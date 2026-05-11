@@ -1,0 +1,1107 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solar Asset Trading Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0d1b2e;
+      --panel-2: #10233a;
+      --panel-3: #122943;
+      --text: #eef5ff;
+      --muted: #91a4bd;
+      --soft: #c6d3e3;
+      --border: rgba(255, 255, 255, 0.08);
+      --green: #32d583;
+      --red: #ff5c7a;
+      --yellow: #fdb022;
+      --blue: #5ea6ff;
+      --cyan: #3ddbd9;
+      --purple: #a78bfa;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      --radius: 22px;
+    }* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(61, 219, 217, 0.16), transparent 36%),
+    radial-gradient(circle at top right, rgba(94, 166, 255, 0.14), transparent 30%),
+    linear-gradient(135deg, #07111f 0%, #091827 48%, #07111f 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 292px 1fr;
+  min-height: 100vh;
+}
+
+aside {
+  border-right: 1px solid var(--border);
+  background: rgba(7, 17, 31, 0.76);
+  backdrop-filter: blur(18px);
+  padding: 26px 22px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #04111f;
+  box-shadow: 0 10px 30px rgba(61, 219, 217, 0.28);
+}
+
+.brand h1 {
+  font-size: 16px;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.brand p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.control-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  margin: 24px 0 9px;
+}
+
+select, button, input {
+  font-family: inherit;
+}
+
+select, input {
+  width: 100%;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 13px 14px;
+  outline: none;
+  font-weight: 600;
+}
+
+input::placeholder {
+  color: #65788e;
+}
+
+.nav-group {
+  display: grid;
+  gap: 9px;
+}
+
+.asset-card {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.045);
+  padding: 13px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: 180ms ease;
+}
+
+.asset-card:hover, .asset-card.active {
+  background: rgba(94, 166, 255, 0.13);
+  border-color: rgba(94, 166, 255, 0.42);
+  transform: translateY(-1px);
+}
+
+.asset-card strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.asset-card span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pill.green { color: #101f17; background: var(--green); }
+.pill.red { color: #2a0710; background: var(--red); }
+.pill.yellow { color: #271804; background: var(--yellow); }
+.pill.blue { color: #061526; background: var(--blue); }
+.pill.dark { color: var(--soft); background: rgba(255, 255, 255, 0.08); }
+
+main {
+  padding: 28px;
+  overflow-x: hidden;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.title-block h2 {
+  margin: 0;
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+}
+
+.title-block p {
+  color: var(--muted);
+  margin: 9px 0 0;
+  max-width: 860px;
+  line-height: 1.5;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  color: #04111f;
+  border: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.grid {
+  display: grid;
+  gap: 18px;
+}
+
+.kpi-grid {
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  margin-bottom: 18px;
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.kpi {
+  padding: 18px;
+  min-height: 130px;
+  position: relative;
+}
+
+.kpi .label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.kpi .value {
+  font-size: 28px;
+  font-weight: 900;
+  margin-top: 12px;
+  letter-spacing: -0.045em;
+}
+
+.kpi .sub {
+  color: var(--muted);
+  margin-top: 9px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sparkline {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  width: 54px;
+  height: 22px;
+  opacity: 0.65;
+}
+
+.main-grid {
+  grid-template-columns: minmax(0, 1.44fr) minmax(360px, 0.86fr);
+  align-items: start;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px 0;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+
+.card-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.chart-wrap {
+  padding: 12px 18px 18px;
+  height: 345px;
+}
+
+.chart-wrap.small {
+  height: 256px;
+}
+
+.split-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stack {
+  display: grid;
+  gap: 18px;
+}
+
+.signal-panel {
+  padding: 18px 20px 20px;
+}
+
+.signal-score {
+  display: grid;
+  grid-template-columns: 118px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.gauge {
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--green) 0deg, var(--green) 246deg, rgba(255,255,255,0.1) 246deg);
+  position: relative;
+}
+
+.gauge::after {
+  content: "";
+  position: absolute;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+
+.gauge span {
+  position: relative;
+  z-index: 2;
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.signal-copy h4 {
+  margin: 0 0 7px;
+  font-size: 18px;
+}
+
+.signal-copy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.insight-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+
+.insight-list li {
+  display: grid;
+  grid-template-columns: 9px 1fr;
+  gap: 11px;
+  color: var(--soft);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(61, 219, 217, 0.13);
+}
+
+.dot.green { background: var(--green); box-shadow: 0 0 0 4px rgba(50, 213, 131, 0.12); }
+.dot.red { background: var(--red); box-shadow: 0 0 0 4px rgba(255, 92, 122, 0.12); }
+.dot.yellow { background: var(--yellow); box-shadow: 0 0 0 4px rgba(253, 176, 34, 0.12); }
+
+.table-card {
+  padding-bottom: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+th, td {
+  padding: 13px 20px;
+  text-align: right;
+  border-top: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th:first-child, td:first-child {
+  text-align: left;
+}
+
+th {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+td {
+  color: var(--soft);
+  font-weight: 650;
+}
+
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.warning { color: var(--yellow); }
+
+.market-tape {
+  display: flex;
+  gap: 10px;
+  overflow: auto;
+  padding: 12px 0 20px;
+  scrollbar-width: none;
+}
+
+.tape-item {
+  flex: 0 0 auto;
+  min-width: 196px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.tape-item .name {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tape-item .price {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.tape-item .delta {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.two-col {
+  grid-template-columns: 1fr 1fr;
+  margin-top: 18px;
+}
+
+.mini-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 11px;
+  padding: 18px 20px 20px;
+}
+
+.mini-metric {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.mini-metric span {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.mini-metric strong {
+  display: block;
+  margin-top: 9px;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+}
+
+.footer-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 18px 2px 0;
+  line-height: 1.45;
+}
+
+@media (max-width: 1220px) {
+  .app-shell { grid-template-columns: 1fr; }
+  aside { position: relative; height: auto; }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .main-grid, .two-col { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  main, aside { padding: 18px; }
+  .topbar { flex-direction: column; }
+  .toolbar { justify-content: flex-start; }
+  .kpi-grid, .split-grid { grid-template-columns: 1fr; }
+  .signal-score { grid-template-columns: 1fr; }
+  th, td { padding: 11px 12px; }
+}
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">MW</div>
+        <div>
+          <h1>MarketWatch Asset Desk</h1>
+          <p>Solar trading intelligence</p>
+        </div>
+      </div><div class="control-label">Asset lookup</div>
+  <input id="assetSearch" placeholder="Search asset, node, hub..." />
+
+  <div class="control-label">ISO</div>
+  <select id="isoSelect">
+    <option value="all">All markets</option>
+    <option value="ERCOT">ERCOT</option>
+    <option value="CAISO">CAISO</option>
+  </select>
+
+  <div class="control-label">Fleet assets</div>
+  <div class="nav-group" id="assetList"></div>
+
+  <div class="control-label">Desk priorities</div>
+  <div class="nav-group">
+    <div class="asset-card">
+      <strong>Basis monitor <span class="pill yellow">Active</span></strong>
+      <span>Node minus hub spread, moving percentile, congestion risk.</span>
+    </div>
+    <div class="asset-card">
+      <strong>Forecast error <span class="pill blue">Hourly</span></strong>
+      <span>ISO load, net load, renewable deviation and ramp exposure.</span>
+    </div>
+    <div class="asset-card">
+      <strong>Revenue-at-risk <span class="pill red">Watch</span></strong>
+      <span>Negative pricing, curtailment, outage, and settlement exposure.</span>
+    </div>
+  </div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <div class="title-block">
+      <h2 id="pageTitle">Solar Asset Command Center</h2>
+      <p id="pageSubtitle">Instant asset-level view of nodal pricing, hub reference pricing, basis, ISO load vs forecast, net load ramps, operating exposure, and tradeable signals.</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn">Export PDF</button>
+      <button class="btn">Settlement View</button>
+      <button class="btn primary">Live Refresh</button>
+    </div>
+  </div>
+
+  <div class="market-tape" id="marketTape"></div>
+
+  <section class="grid kpi-grid">
+    <div class="card kpi">
+      <div class="label">Node RT price</div>
+      <div class="value" id="nodePrice">$--</div>
+      <div class="sub" id="nodeSub">5-min LMP at asset node</div>
+      <canvas class="sparkline" id="spark1"></canvas>
+    </div>
+    <div class="card kpi">
+      <div class="label">Hub RT price</div>
+      <div class="value" id="hubPrice">$--</div>
+      <div class="sub" id="hubSub">Reference hub price</div>
+      <canvas class="sparkline" id="spark2"></canvas>
+    </div>
+    <div class="card kpi">
+      <div class="label">Node-Hub basis</div>
+      <div class="value" id="basis">$--</div>
+      <div class="sub" id="basisSub">Current congestion value</div>
+      <canvas class="sparkline" id="spark3"></canvas>
+    </div>
+    <div class="card kpi">
+      <div class="label">DA / RT spread</div>
+      <div class="value" id="dart">$--</div>
+      <div class="sub">Real-time premium vs day-ahead</div>
+      <canvas class="sparkline" id="spark4"></canvas>
+    </div>
+    <div class="card kpi">
+      <div class="label">Capacity factor</div>
+      <div class="value" id="cf">--%</div>
+      <div class="sub">Current MW / AC capacity</div>
+      <canvas class="sparkline" id="spark5"></canvas>
+    </div>
+    <div class="card kpi">
+      <div class="label">Revenue-at-risk</div>
+      <div class="value" id="rar">$--</div>
+      <div class="sub">Next 24h basis and negative price risk</div>
+      <canvas class="sparkline" id="spark6"></canvas>
+    </div>
+  </section>
+
+  <section class="grid main-grid">
+    <div class="stack">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Price Formation: Node vs Hub vs Day-Ahead</h3>
+            <p>Track intraday LMP behavior, asset basis, settlement exposure, and whether the node is outperforming the reference hub.</p>
+          </div>
+          <span class="pill dark" id="priceBadge">Live proxy</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid split-grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 id="loadTitle">ISO Load vs Forecast</h3>
+              <p>Forecast miss drives scarcity risk, ancillary volatility, congestion and real-time price surprise.</p>
+            </div>
+          </div>
+          <div class="chart-wrap small">
+            <canvas id="loadChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 id="netLoadTitle">ISO Net Load & Ramp</h3>
+              <p>Useful for identifying duck-curve stress, evening ramp premiums, and negative midday pricing risk.</p>
+            </div>
+          </div>
+          <div class="chart-wrap small">
+            <canvas id="netLoadChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="card-header">
+          <div>
+            <h3>Forward Operating & Trading Checklist</h3>
+            <p>Prioritized items an analyst or trader would want before bidding, hedging, or explaining asset performance.</p>
+          </div>
+          <span class="pill green">Value Add</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Monitor</th>
+              <th>Current</th>
+              <th>Threshold</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="checklistRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card signal-panel">
+        <div class="card-header" style="padding: 0;">
+          <div>
+            <h3>Asset Trading Signal</h3>
+            <p>Composite score using basis, RT premium, forecast miss, curtailment proxy, and ramp risk.</p>
+          </div>
+          <span class="pill" id="signalPill">Buy RT</span>
+        </div>
+        <div class="signal-score">
+          <div class="gauge" id="signalGauge"><span id="signalScore">68</span></div>
+          <div class="signal-copy">
+            <h4 id="signalTitle">Constructive real-time setup</h4>
+            <p id="signalText">Node is clearing above hub with moderate positive basis and supportive ISO load deviation.</p>
+          </div>
+        </div>
+        <ul class="insight-list" id="insightList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Congestion & Basis Decomposition</h3>
+            <p>Separate market price from local congestion so performance variance is easier to explain.</p>
+          </div>
+        </div>
+        <div class="chart-wrap small">
+          <canvas id="basisChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>Asset Fundamentals</h3>
+            <p>Operational context for settlement reviews, forecast checks, and trading handoffs.</p>
+          </div>
+        </div>
+        <div class="mini-metric-grid" id="fundamentals"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid two-col">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Negative Pricing & Curtailment Window</h3>
+          <p>High-value solar alerting: midday oversupply, low net load, transmission constraints, and local LMP weakness.</p>
+        </div>
+      </div>
+      <div class="chart-wrap small">
+        <canvas id="negativeChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Settlement Bridge</h3>
+          <p>Quick explainability from hub benchmark to nodal realized price and estimated asset revenue impact.</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>$/MWh</th>
+            <th>MW</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody id="settlementRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="footer-note">Prototype uses mock data for presentation. Wire this dashboard to ERCOT MIS / CAISO OASIS, internal SCADA, nodal settlement feeds, price curves, outage data, asset forecasts, and portfolio P&L systems for production use.</p>
+</main>
+
+  </div>  <script>
+    const assets = [
+      {
+        id: 'blue-mesa', name: 'Blue Mesa Solar', iso: 'ERCOT', zone: 'West', node: 'BLUEMESA_RN', hub: 'HB_WEST', capacity: 180, currentMW: 132,
+        nodePrice: 31.42, hubPrice: 27.86, daPrice: 25.10, forecastMW: 142, availability: 98.4, curtailment: 3.2, rar: 18400,
+        loadActual: [70200, 70950, 71600, 72180, 72890, 73940, 75210, 76500, 77780, 78400, 79080, 79920],
+        loadForecast: [69900, 70400, 71180, 71920, 72620, 73300, 74400, 75850, 77100, 77900, 78800, 79450],
+        netLoad: [42500, 40800, 38400, 35200, 31800, 29200, 28700, 30600, 34800, 40100, 46200, 51100],
+        prices: [22, 23, 24, 26, 28, 31, 33, 34, 31, 29, 28, 31],
+        hub: [24, 24, 25, 25, 26, 27, 28, 29, 28, 28, 27, 28],
+        dayAhead: [25, 25, 25, 25, 25, 25, 26, 26, 25, 25, 25, 25]
+      },
+      {
+        id: 'rio-bravo', name: 'Rio Bravo Solar', iso: 'ERCOT', zone: 'South', node: 'RIOBRAVO_RN', hub: 'HB_SOUTH', capacity: 240, currentMW: 199,
+        nodePrice: 18.35, hubPrice: 24.92, daPrice: 22.70, forecastMW: 214, availability: 96.1, curtailment: 8.7, rar: 42100,
+        loadActual: [70200, 70950, 71600, 72180, 72890, 73940, 75210, 76500, 77780, 78400, 79080, 79920],
+        loadForecast: [69900, 70400, 71180, 71920, 72620, 73300, 74400, 75850, 77100, 77900, 78800, 79450],
+        netLoad: [42500, 40800, 38400, 35200, 31800, 29200, 28700, 30600, 34800, 40100, 46200, 51100],
+        prices: [29, 26, 22, 18, 11, -4, -9, 3, 12, 18, 20, 18],
+        hub: [25, 25, 24, 24, 23, 22, 21, 22, 23, 24, 25, 25],
+        dayAhead: [23, 23, 23, 23, 22, 22, 22, 22, 23, 23, 23, 23]
+      },
+      {
+        id: 'desert-peak', name: 'Desert Peak Solar', iso: 'CAISO', zone: 'SP15', node: 'DESERTPK_1_N001', hub: 'SP15 EZ Gen Hub', capacity: 155, currentMW: 111,
+        nodePrice: 39.84, hubPrice: 34.15, daPrice: 30.80, forecastMW: 118, availability: 99.0, curtailment: 1.6, rar: 12700,
+        loadActual: [28200, 28700, 29100, 29600, 30300, 31200, 32400, 33700, 35100, 36300, 37100, 37600],
+        loadForecast: [28400, 28800, 29250, 29800, 30500, 31400, 32700, 34000, 35300, 36500, 37300, 37900],
+        netLoad: [20800, 18700, 15100, 11900, 9200, 7600, 8400, 12300, 18200, 24600, 29100, 31800],
+        prices: [26, 24, 20, 17, 13, 9, 7, 18, 31, 45, 52, 40],
+        hub: [27, 25, 22, 19, 16, 13, 12, 20, 29, 39, 44, 34],
+        dayAhead: [31, 30, 30, 29, 28, 27, 27, 29, 31, 34, 35, 31]
+      },
+      {
+        id: 'sierra-sun', name: 'Sierra Sun Solar', iso: 'CAISO', zone: 'NP15', node: 'SIERRASUN_2_N101', hub: 'NP15 EZ Gen Hub', capacity: 95, currentMW: 67,
+        nodePrice: 12.70, hubPrice: 29.40, daPrice: 28.25, forecastMW: 81, availability: 94.6, curtailment: 11.3, rar: 38600,
+        loadActual: [28200, 28700, 29100, 29600, 30300, 31200, 32400, 33700, 35100, 36300, 37100, 37600],
+        loadForecast: [28400, 28800, 29250, 29800, 30500, 31400, 32700, 34000, 35300, 36500, 37300, 37900],
+        netLoad: [20800, 18700, 15100, 11900, 9200, 7600, 8400, 12300, 18200, 24600, 29100, 31800],
+        prices: [28, 22, 13, 5, -8, -19, -16, -3, 12, 26, 31, 13],
+        hub: [30, 28, 25, 21, 18, 16, 17, 21, 25, 30, 33, 29],
+        dayAhead: [29, 29, 28, 28, 27, 27, 27, 28, 29, 29, 29, 28]
+      }
+    ];
+
+    const labels = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+    let selectedAsset = assets[0];
+    let charts = {};
+
+    const money = value => `${value < 0 ? '-' : ''}$${Math.abs(value).toFixed(2)}`;
+    const compactMoney = value => `${value < 0 ? '-' : ''}$${Math.abs(value / 1000).toFixed(1)}k`;
+    const basis = a => a.nodePrice - a.hubPrice;
+    const dart = a => a.nodePrice - a.daPrice;
+    const cf = a => a.currentMW / a.capacity * 100;
+
+    const chartDefaults = () => {
+      Chart.defaults.color = '#91a4bd';
+      Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+      Chart.defaults.font.family = 'Inter';
+    };
+
+    function lineDataset(label, data, color, fill = false) {
+      return {
+        label,
+        data,
+        borderColor: color,
+        backgroundColor: color.replace('1)', '0.14)'),
+        borderWidth: 2.5,
+        fill,
+        tension: 0.38,
+        pointRadius: 0,
+        pointHoverRadius: 5
+      };
+    }
+
+    function destroyChart(id) {
+      if (charts[id]) charts[id].destroy();
+    }
+
+    function buildLineChart(id, datasets, yTitle = '') {
+      destroyChart(id);
+      charts[id] = new Chart(document.getElementById(id), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { usePointStyle: true, boxWidth: 8, boxHeight: 8 } },
+            tooltip: {
+              backgroundColor: '#06111f',
+              borderColor: 'rgba(255,255,255,0.15)',
+              borderWidth: 1,
+              padding: 12,
+              titleColor: '#eef5ff',
+              bodyColor: '#c6d3e3'
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              title: { display: Boolean(yTitle), text: yTitle },
+              ticks: { callback: value => Number(value).toLocaleString() }
+            }
+          }
+        }
+      });
+    }
+
+    function buildBarChart(id, labelsIn, data, color) {
+      destroyChart(id);
+      charts[id] = new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+          labels: labelsIn,
+          datasets: [{ label: 'Impact', data, backgroundColor: color, borderRadius: 10 }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false } }, y: { ticks: { callback: value => `$${value}` } } }
+        }
+      });
+    }
+
+    function renderAssetList() {
+      const iso = document.getElementById('isoSelect').value;
+      const search = document.getElementById('assetSearch').value.toLowerCase();
+      const list = document.getElementById('assetList');
+      list.innerHTML = '';
+
+      assets
+        .filter(a => iso === 'all' || a.iso === iso)
+        .filter(a => [a.name, a.node, a.hub, a.zone].join(' ').toLowerCase().includes(search))
+        .forEach(a => {
+          const spread = basis(a);
+          const div = document.createElement('div');
+          div.className = `asset-card ${a.id === selectedAsset.id ? 'active' : ''}`;
+          div.onclick = () => { selectedAsset = a; renderAll(); };
+          div.innerHTML = `
+            <strong>${a.name}<span class="pill ${spread >= 0 ? 'green' : 'red'}">${money(spread)}</span></strong>
+            <span>${a.iso} • ${a.zone} • ${a.node}</span>
+          `;
+          list.appendChild(div);
+        });
+    }
+
+    function renderTape() {
+      const tape = document.getElementById('marketTape');
+      const items = assets.map(a => ({
+        name: `${a.name} Node`, price: a.nodePrice, delta: basis(a), label: `${a.iso} ${a.zone}`
+      })).concat([
+        { name: 'ERCOT system load', price: 79920, delta: 470, label: 'MW vs forecast' },
+        { name: 'CAISO net load ramp', price: 7240, delta: 920, label: 'MW next 3h' }
+      ]);
+
+      tape.innerHTML = items.map(item => `
+        <div class="tape-item">
+          <div class="name">${item.name}</div>
+          <div class="price">${item.price > 1000 ? item.price.toLocaleString() : money(item.price)}</div>
+          <div class="delta ${item.delta >= 0 ? 'positive' : 'negative'}">${item.delta >= 0 ? '+' : ''}${item.price > 1000 ? item.delta.toLocaleString() + ' ' + item.label : money(item.delta) + ' basis'}</div>
+        </div>
+      `).join('');
+    }
+
+    function signalFor(a) {
+      let score = 50;
+      score += Math.max(Math.min(basis(a) * 3, 18), -22);
+      score += Math.max(Math.min(dart(a) * 2, 14), -12);
+      score -= a.curtailment * 1.5;
+      score += a.iso === 'CAISO' && a.netLoad[11] - a.netLoad[6] > 18000 ? 8 : 0;
+      score += a.iso === 'ERCOT' && a.loadActual[11] - a.loadForecast[11] > 300 ? 7 : 0;
+      score = Math.round(Math.max(5, Math.min(95, score)));
+
+      if (score >= 70) return { score, label: 'Constructive', pill: 'Buy RT', cls: 'green', title: 'Constructive real-time setup', text: 'Node performance and system conditions support higher realized value relative to hub benchmark.' };
+      if (score >= 48) return { score, label: 'Neutral', pill: 'Monitor', cls: 'yellow', title: 'Balanced setup', text: 'Market signal is mixed. Keep focus on basis behavior, forecast miss, and ramp timing before changing bids.' };
+      return { score, label: 'Defensive', pill: 'Hedge / Curtail Watch', cls: 'red', title: 'Defensive operating setup', text: 'Negative basis or curtailment pressure is elevated. Review bidding, hedges, and dispatch constraints.' };
+    }
+
+    function renderKpis(a) {
+      document.getElementById('nodePrice').textContent = money(a.nodePrice);
+      document.getElementById('hubPrice').textContent = money(a.hubPrice);
+      document.getElementById('basis').textContent = money(basis(a));
+      document.getElementById('dart').textContent = money(dart(a));
+      document.getElementById('cf').textContent = `${cf(a).toFixed(1)}%`;
+      document.getElementById('rar').textContent = compactMoney(a.rar);
+      document.getElementById('nodeSub').textContent = `${a.node} 5-min LMP`;
+      document.getElementById('hubSub').textContent = `${a.hub} reference price`;
+      document.getElementById('basisSub').textContent = basis(a) >= 0 ? 'Node outperforming hub' : 'Node discount to hub';
+
+      [1,2,3,4,5,6].forEach((n, idx) => {
+        const canvas = document.getElementById(`spark${n}`);
+        if (!canvas) return;
+        if (charts[`spark${n}`]) charts[`spark${n}`].destroy();
+        const data = idx === 0 ? a.prices : idx === 1 ? a.hub : idx === 2 ? a.prices.map((p, i) => p - a.hub[i]) : idx === 3 ? a.prices.map(p => p - a.daPrice) : a.netLoad.map(v => v / 1000);
+        charts[`spark${n}`] = new Chart(canvas, {
+          type: 'line',
+          data: { labels, datasets: [{ data, borderColor: idx === 2 && basis(a) < 0 ? '#ff5c7a' : '#3ddbd9', borderWidth: 2, pointRadius: 0, tension: 0.4 }] },
+          options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
+        });
+      });
+    }
+
+    function renderCharts(a) {
+      buildLineChart('priceChart', [
+        lineDataset('Node RT LMP', a.prices, 'rgba(61, 219, 217, 1)'),
+        lineDataset('Hub RT', a.hub, 'rgba(94, 166, 255, 1)'),
+        lineDataset('Day-Ahead', a.dayAhead, 'rgba(167, 139, 250, 1)')
+      ], '$/MWh');
+
+      buildLineChart('loadChart', [
+        lineDataset('Actual load', a.loadActual, 'rgba(94, 166, 255, 1)'),
+        lineDataset('Forecast load', a.loadForecast, 'rgba(198, 211, 227, 1)')
+      ], 'MW');
+
+      buildLineChart('netLoadChart', [
+        lineDataset('Net load', a.netLoad, 'rgba(253, 176, 34, 1)', true),
+        lineDataset('3h ramp proxy', a.netLoad.map((v, i, arr) => i < 3 ? 0 : v - arr[i - 3]), 'rgba(255, 92, 122, 1)')
+      ], 'MW');
+
+      const basisData = a.prices.map((p, i) => +(p - a.hub[i]).toFixed(2));
+      buildLineChart('basisChart', [
+        lineDataset('Node-Hub basis', basisData, basis(a) >= 0 ? 'rgba(50, 213, 131, 1)' : 'rgba(255, 92, 122, 1)', true)
+      ], '$/MWh');
+
+      const negativeRisk = a.prices.map((p, i) => Math.max(0, (15 - p) + a.curtailment + Math.max(0, 14000 - a.netLoad[i]) / 1200));
+      buildBarChart('negativeChart', labels, negativeRisk.map(v => +v.toFixed(1)), 'rgba(255, 92, 122, 0.72)');
+    }
+
+    function renderSignal(a) {
+      const s = signalFor(a);
+      const gauge = document.getElementById('signalGauge');
+      const deg = Math.round(s.score / 100 * 360);
+      const color = s.cls === 'green' ? '#32d583' : s.cls === 'yellow' ? '#fdb022' : '#ff5c7a';
+      gauge.style.background = `conic-gradient(${color} 0deg, ${color} ${deg}deg, rgba(255,255,255,0.1) ${deg}deg)`;
+      document.getElementById('signalScore').textContent = s.score;
+      document.getElementById('signalTitle').textContent = s.title;
+      document.getElementById('signalText').textContent = s.text;
+      const pill = document.getElementById('signalPill');
+      pill.textContent = s.pill;
+      pill.className = `pill ${s.cls}`;
+
+      const loadMiss = a.loadActual[11] - a.loadForecast[11];
+      const eveningRamp = a.netLoad[11] - a.netLoad[6];
+      const insights = [
+        { cls: basis(a) >= 0 ? 'green' : 'red', text: `${money(basis(a))}/MWh node-hub basis: ${basis(a) >= 0 ? 'local node is adding value versus hub.' : 'local congestion is dragging realized price below hub.'}` },
+        { cls: dart(a) >= 0 ? 'green' : 'yellow', text: `${money(dart(a))}/MWh DA/RT spread: ${dart(a) >= 0 ? 'real-time is outperforming scheduled benchmark.' : 'day-ahead may be protecting downside.'}` },
+        { cls: Math.abs(loadMiss) > 300 ? 'yellow' : 'green', text: `${a.iso} load is ${loadMiss >= 0 ? 'above' : 'below'} forecast by ${Math.abs(loadMiss).toLocaleString()} MW, shaping scarcity and price surprise.` },
+        { cls: eveningRamp > 15000 ? 'yellow' : 'green', text: `Net load ramp into evening is ${eveningRamp.toLocaleString()} MW, a key driver for post-solar price strength.` },
+        { cls: a.curtailment > 7 ? 'red' : 'green', text: `Curtailment proxy is ${a.curtailment.toFixed(1)}%, ${a.curtailment > 7 ? 'high enough to warrant bid and outage review.' : 'currently manageable.'}` }
+      ];
+      document.getElementById('insightList').innerHTML = insights.map(i => `<li><span class="dot ${i.cls}"></span><span>${i.text}</span></li>`).join('');
+    }
+
+    function renderFundamentals(a) {
+      const items = [
+        ['ISO / Zone', `${a.iso} / ${a.zone}`],
+        ['Asset Node', a.node],
+        ['Reference Hub', a.hub],
+        ['AC Capacity', `${a.capacity} MW`],
+        ['Current Output', `${a.currentMW} MW`],
+        ['Forecast Output', `${a.forecastMW} MW`],
+        ['Availability', `${a.availability.toFixed(1)}%`],
+        ['Curtailment Proxy', `${a.curtailment.toFixed(1)}%`]
+      ];
+      document.getElementById('fundamentals').innerHTML = items.map(([label, value]) => `
+        <div class="mini-metric"><span>${label}</span><strong>${value}</strong></div>
+      `).join('');
+    }
+
+    function renderTables(a) {
+      const rows = [
+        ['Negative price exposure', `${Math.min(...a.prices).toFixed(2)} $/MWh`, '> 2 intervals < $0', Math.min(...a.prices) < 0 ? 'Breach' : 'Clear', Math.min(...a.prices) < 0 ? 'Review bids / curtailment logic' : 'Monitor'],
+        ['Basis percentile proxy', `${money(basis(a))}`, '< -$5/MWh', basis(a) < -5 ? 'Breach' : 'Clear', basis(a) < -5 ? 'Check congestion / outages' : 'No action'],
+        ['Load forecast error', `${(a.loadActual[11] - a.loadForecast[11]).toLocaleString()} MW`, '±500 MW', Math.abs(a.loadActual[11] - a.loadForecast[11]) > 500 ? 'Watch' : 'Clear', 'Track scarcity adders'],
+        ['Net load evening ramp', `${(a.netLoad[11] - a.netLoad[6]).toLocaleString()} MW`, '> 15,000 MW', a.netLoad[11] - a.netLoad[6] > 15000 ? 'Watch' : 'Clear', 'Assess evening RT premium'],
+        ['Forecast vs actual MW', `${(a.currentMW - a.forecastMW).toFixed(0)} MW`, '< -10 MW', a.currentMW - a.forecastMW < -10 ? 'Breach' : 'Clear', 'Validate plant / weather forecast']
+      ];
+      document.getElementById('checklistRows').innerHTML = rows.map(r => `
+        <tr>
+          <td>${r[0]}</td>
+          <td>${r[1]}</td>
+          <td>${r[2]}</td>
+          <td class="${r[3] === 'Breach' ? 'negative' : r[3] === 'Watch' ? 'warning' : 'positive'}">${r[3]}</td>
+          <td>${r[4]}</td>
+        </tr>
+      `).join('');
+
+      const settlement = [
+        ['Hub benchmark', a.hubPrice, a.currentMW, a.hubPrice * a.currentMW],
+        ['Node basis', basis(a), a.currentMW, basis(a) * a.currentMW],
+        ['DA/RT variance', dart(a), a.currentMW, dart(a) * a.currentMW],
+        ['Curtailment drag', -a.curtailment / 100 * a.nodePrice, a.capacity - a.currentMW, -a.curtailment / 100 * a.nodePrice * (a.capacity - a.currentMW)]
+      ];
+      document.getElementById('settlementRows').innerHTML = settlement.map(r => `
+        <tr>
+          <td>${r[0]}</td>
+          <td class="${r[1] >= 0 ? 'positive' : 'negative'}">${money(r[1])}</td>
+          <td>${r[2].toFixed(0)}</td>
+          <td class="${r[3] >= 0 ? 'positive' : 'negative'}">${compactMoney(r[3])}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTitles(a) {
+      document.getElementById('pageTitle').textContent = `${a.name} — ${a.iso} Asset View`;
+      document.getElementById('pageSubtitle').textContent = `${a.capacity} MW solar asset at ${a.node}, benchmarked to ${a.hub}. Focused on node/hub basis, ISO forecast error, net load ramp, curtailment risk, and settlement explainability.`;
+      document.getElementById('loadTitle').textContent = `${a.iso} Load vs Forecast`;
+      document.getElementById('netLoadTitle').textContent = `${a.iso} Net Load & Ramp`;
+      document.getElementById('priceBadge').textContent = `${a.iso} • ${a.zone}`;
+    }
+
+    function renderAll() {
+      renderAssetList();
+      renderTape();
+      renderTitles(selectedAsset);
+      renderKpis(selectedAsset);
+      renderCharts(selectedAsset);
+      renderSignal(selectedAsset);
+      renderFundamentals(selectedAsset);
+      renderTables(selectedAsset);
+    }
+
+    document.getElementById('isoSelect').addEventListener('change', renderAssetList);
+    document.getElementById('assetSearch').addEventListener('input', renderAssetList);
+
+    chartDefaults();
+    renderAll();
+  </script></body>
+</html>
