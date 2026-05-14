@@ -1,1107 +1,459 @@
-<!DOCTYPE html><html lang="en">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solar Asset Trading Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>May 2026 Molecule Revenue And Generation</title>
   <style>
     :root {
-      --bg: #07111f;
-      --panel: #0d1b2e;
-      --panel-2: #10233a;
-      --panel-3: #122943;
-      --text: #eef5ff;
-      --muted: #91a4bd;
-      --soft: #c6d3e3;
-      --border: rgba(255, 255, 255, 0.08);
-      --green: #32d583;
-      --red: #ff5c7a;
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --surface-soft: #f9fafb;
+      --ink: #111827;
+      --muted: #667085;
+      --line: #d9e0ea;
+      --line-soft: #edf0f4;
+      --blue: #155eef;
+      --blue-soft: #eff6ff;
+      --green: #067647;
+      --green-soft: #ecfdf3;
+      --yellow: #b54708;
+      --yellow-soft: #fffaeb;
+      --red: #b42318;
+      --red-soft: #fff1f3;
+      --shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
+    }
+
+    body.dark {
+      --bg: #111827;
+      --surface: #182230;
+      --surface-soft: #202b3a;
+      --ink: #f8fafc;
+      --muted: #aab4c3;
+      --line: #344054;
+      --line-soft: #2a3647;
+      --blue: #84adff;
+      --blue-soft: #1f2f4f;
+      --green: #47cd89;
+      --green-soft: #12372a;
       --yellow: #fdb022;
-      --blue: #5ea6ff;
-      --cyan: #3ddbd9;
-      --purple: #a78bfa;
-      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
-      --radius: 22px;
-    }* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(61, 219, 217, 0.16), transparent 36%),
-    radial-gradient(circle at top right, rgba(94, 166, 255, 0.14), transparent 30%),
-    linear-gradient(135deg, #07111f 0%, #091827 48%, #07111f 100%);
-  color: var(--text);
-  min-height: 100vh;
-}
-
-.app-shell {
-  display: grid;
-  grid-template-columns: 292px 1fr;
-  min-height: 100vh;
-}
-
-aside {
-  border-right: 1px solid var(--border);
-  background: rgba(7, 17, 31, 0.76);
-  backdrop-filter: blur(18px);
-  padding: 26px 22px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 30px;
-}
-
-.brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--cyan), var(--blue));
-  display: grid;
-  place-items: center;
-  font-weight: 900;
-  color: #04111f;
-  box-shadow: 0 10px 30px rgba(61, 219, 217, 0.28);
-}
-
-.brand h1 {
-  font-size: 16px;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.brand p {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.control-label {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  margin: 24px 0 9px;
-}
-
-select, button, input {
-  font-family: inherit;
-}
-
-select, input {
-  width: 100%;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 13px 14px;
-  outline: none;
-  font-weight: 600;
-}
-
-input::placeholder {
-  color: #65788e;
-}
-
-.nav-group {
-  display: grid;
-  gap: 9px;
-}
-
-.asset-card {
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.045);
-  padding: 13px;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: 180ms ease;
-}
-
-.asset-card:hover, .asset-card.active {
-  background: rgba(94, 166, 255, 0.13);
-  border-color: rgba(94, 166, 255, 0.42);
-  transform: translateY(-1px);
-}
-
-.asset-card strong {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.asset-card span {
-  display: block;
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 5px 8px;
-  font-size: 11px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.pill.green { color: #101f17; background: var(--green); }
-.pill.red { color: #2a0710; background: var(--red); }
-.pill.yellow { color: #271804; background: var(--yellow); }
-.pill.blue { color: #061526; background: var(--blue); }
-.pill.dark { color: var(--soft); background: rgba(255, 255, 255, 0.08); }
-
-main {
-  padding: 28px;
-  overflow-x: hidden;
-}
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: flex-start;
-  margin-bottom: 22px;
-}
-
-.title-block h2 {
-  margin: 0;
-  font-size: clamp(26px, 3vw, 42px);
-  line-height: 1.05;
-  letter-spacing: -0.055em;
-}
-
-.title-block p {
-  color: var(--muted);
-  margin: 9px 0 0;
-  max-width: 860px;
-  line-height: 1.5;
-}
-
-.toolbar {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.btn {
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--text);
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 160ms ease;
-}
-
-.btn.primary {
-  background: linear-gradient(135deg, var(--cyan), var(--blue));
-  color: #04111f;
-  border: none;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-}
-
-.grid {
-  display: grid;
-  gap: 18px;
-}
-
-.kpi-grid {
-  grid-template-columns: repeat(6, minmax(150px, 1fr));
-  margin-bottom: 18px;
-}
-
-.card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.kpi {
-  padding: 18px;
-  min-height: 130px;
-  position: relative;
-}
-
-.kpi .label {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.kpi .value {
-  font-size: 28px;
-  font-weight: 900;
-  margin-top: 12px;
-  letter-spacing: -0.045em;
-}
-
-.kpi .sub {
-  color: var(--muted);
-  margin-top: 9px;
-  font-size: 12px;
-  line-height: 1.35;
-}
-
-.sparkline {
-  position: absolute;
-  bottom: 14px;
-  right: 14px;
-  width: 54px;
-  height: 22px;
-  opacity: 0.65;
-}
-
-.main-grid {
-  grid-template-columns: minmax(0, 1.44fr) minmax(360px, 0.86fr);
-  align-items: start;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px 20px 0;
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: 17px;
-  letter-spacing: -0.02em;
-}
-
-.card-header p {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.chart-wrap {
-  padding: 12px 18px 18px;
-  height: 345px;
-}
-
-.chart-wrap.small {
-  height: 256px;
-}
-
-.split-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.stack {
-  display: grid;
-  gap: 18px;
-}
-
-.signal-panel {
-  padding: 18px 20px 20px;
-}
-
-.signal-score {
-  display: grid;
-  grid-template-columns: 118px 1fr;
-  gap: 18px;
-  align-items: center;
-  margin-top: 14px;
-}
-
-.gauge {
-  width: 118px;
-  height: 118px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: conic-gradient(var(--green) 0deg, var(--green) 246deg, rgba(255,255,255,0.1) 246deg);
-  position: relative;
-}
-
-.gauge::after {
-  content: "";
-  position: absolute;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: var(--panel);
-  border: 1px solid var(--border);
-}
-
-.gauge span {
-  position: relative;
-  z-index: 2;
-  font-size: 27px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.signal-copy h4 {
-  margin: 0 0 7px;
-  font-size: 18px;
-}
-
-.signal-copy p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
-  font-size: 13px;
-}
-
-.insight-list {
-  list-style: none;
-  margin: 16px 0 0;
-  padding: 0;
-  display: grid;
-  gap: 11px;
-}
-
-.insight-list li {
-  display: grid;
-  grid-template-columns: 9px 1fr;
-  gap: 11px;
-  color: var(--soft);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  margin-top: 5px;
-  border-radius: 999px;
-  background: var(--cyan);
-  box-shadow: 0 0 0 4px rgba(61, 219, 217, 0.13);
-}
-
-.dot.green { background: var(--green); box-shadow: 0 0 0 4px rgba(50, 213, 131, 0.12); }
-.dot.red { background: var(--red); box-shadow: 0 0 0 4px rgba(255, 92, 122, 0.12); }
-.dot.yellow { background: var(--yellow); box-shadow: 0 0 0 4px rgba(253, 176, 34, 0.12); }
-
-.table-card {
-  padding-bottom: 8px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-  font-size: 13px;
-}
-
-th, td {
-  padding: 13px 20px;
-  text-align: right;
-  border-top: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-th:first-child, td:first-child {
-  text-align: left;
-}
-
-th {
-  color: var(--muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-}
-
-td {
-  color: var(--soft);
-  font-weight: 650;
-}
-
-.positive { color: var(--green); }
-.negative { color: var(--red); }
-.warning { color: var(--yellow); }
-
-.market-tape {
-  display: flex;
-  gap: 10px;
-  overflow: auto;
-  padding: 12px 0 20px;
-  scrollbar-width: none;
-}
-
-.tape-item {
-  flex: 0 0 auto;
-  min-width: 196px;
-  padding: 13px 14px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.055);
-}
-
-.tape-item .name {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.tape-item .price {
-  margin-top: 8px;
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-}
-
-.tape-item .delta {
-  margin-top: 5px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.two-col {
-  grid-template-columns: 1fr 1fr;
-  margin-top: 18px;
-}
-
-.mini-metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 11px;
-  padding: 18px 20px 20px;
-}
-
-.mini-metric {
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px;
-}
-
-.mini-metric span {
-  color: var(--muted);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 800;
-}
-
-.mini-metric strong {
-  display: block;
-  margin-top: 9px;
-  font-size: 19px;
-  letter-spacing: -0.03em;
-}
-
-.footer-note {
-  color: var(--muted);
-  font-size: 12px;
-  margin: 18px 2px 0;
-  line-height: 1.45;
-}
-
-@media (max-width: 1220px) {
-  .app-shell { grid-template-columns: 1fr; }
-  aside { position: relative; height: auto; }
-  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-  .main-grid, .two-col { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 760px) {
-  main, aside { padding: 18px; }
-  .topbar { flex-direction: column; }
-  .toolbar { justify-content: flex-start; }
-  .kpi-grid, .split-grid { grid-template-columns: 1fr; }
-  .signal-score { grid-template-columns: 1fr; }
-  th, td { padding: 11px 12px; }
-}
-
+      --yellow-soft: #3d2d12;
+      --red: #f97066;
+      --red-soft: #3b1d22;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.45;
+    }
+    button, select { font: inherit; }
+    .page {
+      width: min(1640px, calc(100vw - 12px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 22px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+    .eyebrow {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 3px 0 0; font-size: 28px; line-height: 1.15; }
+    .meta { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .tool, .date-select {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0 12px;
+      font-weight: 750;
+    }
+    .tool { cursor: pointer; }
+    .tool.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    body.dark .tool.active { color: #111827; }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(150px, 1fr)); gap: 16px; margin-bottom: 18px; }
+    .kpi {
+      min-height: 112px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .kpi-header { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; font-weight: 850; text-transform: uppercase; }
+    .kpi-value { margin-top: 8px; font-size: 26px; font-weight: 850; white-space: nowrap; }
+    .kpi-sub { margin-top: 3px; color: var(--muted); font-size: 13px; }
+    .readout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .visuals { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; margin-bottom: 18px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: var(--surface); box-shadow: var(--shadow); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--surface-soft); }
+    .panel-title { font-size: 16px; font-weight: 850; }
+    .panel-note { color: var(--muted); font-size: 13px; font-weight: 650; }
+    .chart-body { padding: 16px; }
+    svg { width: 100%; height: auto; display: block; }
+    .axis { stroke: var(--line); stroke-width: 1; }
+    .line-gen { fill: none; stroke: var(--blue); stroke-width: 3; }
+    .line-rev { fill: none; stroke: var(--green); stroke-width: 3; }
+    .line-aop { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 5 5; opacity: 0.85; }
+    .point { cursor: pointer; stroke: var(--surface); stroke-width: 2; }
+    .chart-label { fill: var(--muted); font-size: 12px; font-weight: 700; }
+    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; color: var(--muted); font-size: 12px; font-weight: 750; }
+    .legend-line { display: inline-flex; align-items: center; gap: 7px; }
+    .sample { width: 20px; height: 3px; border-radius: 999px; background: var(--blue); display: inline-block; }
+    .sample.rev { background: var(--green); }
+    .sample.aop { background: var(--muted); opacity: 0.7; }
+    .project-bars { display: grid; gap: 11px; }
+    .chart-row { display: grid; grid-template-columns: 92px minmax(120px, 1fr) 64px; gap: 12px; align-items: center; cursor: pointer; }
+    .chart-name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chart-value { text-align: right; font-weight: 850; }
+    .chart-track { height: 14px; overflow: hidden; border-radius: 999px; background: #e7ecf2; position: relative; }
+    body.dark .chart-track, body.dark .track { background: #2e3a4c; }
+    .chart-fill { height: 100%; border-radius: inherit; min-width: 2px; }
+    .chart-marker { position: absolute; top: 0; bottom: 0; left: 95%; width: 2px; background: rgba(17, 24, 39, 0.45); }
+    body.dark .chart-marker { background: rgba(248, 250, 252, 0.55); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 0; table-layout: fixed; border-collapse: collapse; }
+    th, td { padding: 15px 16px; border-bottom: 1px solid var(--line-soft); text-align: right; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 1; background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: 0.02em; text-transform: uppercase; }
+    th:first-child, td:first-child { width: 18%; text-align: left; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover, tbody tr.selected { background: var(--blue-soft); }
+    tfoot td { border-top: 2px solid var(--line); border-bottom: 0; background: var(--surface-soft); font-weight: 850; }
+    .project-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+    .green { background: var(--green); }
+    .yellow { background: var(--yellow); }
+    .red { background: var(--red); }
+    .signal { display: inline-flex; min-width: 76px; align-items: center; justify-content: flex-end; gap: 7px; font-weight: 850; }
+    .bar { display: grid; grid-template-columns: minmax(84px, 1fr) auto; align-items: center; gap: 8px; }
+    .track { height: 8px; overflow: hidden; border-radius: 999px; background: #e7ecf2; }
+    .fill { height: 100%; border-radius: inherit; }
+    .detail { padding: 18px; }
+    .detail h2 { margin: 0; font-size: 24px; line-height: 1.2; }
+    .status-pill { display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; padding: 5px 9px; border-radius: 999px; font-size: 13px; font-weight: 850; }
+    .status-pill.green { color: var(--green); background: var(--green-soft); }
+    .status-pill.yellow { color: var(--yellow); background: var(--yellow-soft); }
+    .status-pill.red { color: var(--red); background: var(--red-soft); }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .detail-card { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-soft); }
+    .detail-label { color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: 0.02em; text-transform: uppercase; }
+    .detail-value { margin-top: 5px; font-size: 20px; font-weight: 850; }
+    .detail-sub { margin-top: 5px; color: var(--muted); font-size: 13px; }
+    .section { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .section-title { margin-bottom: 8px; color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: 0.02em; text-transform: uppercase; }
+    .read-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; font-size: 14px; }
+    .read-row span { color: var(--muted); }
+    .read-row strong { text-align: right; }
+    @media (max-width: 960px) { .topbar, .readout, .layout, .visuals { grid-template-columns: 1fr; } .toolbar, .legend { justify-content: flex-start; } .kpis { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .page { width: min(100vw - 12px, 1640px); padding-top: 14px; } .kpis, .detail-grid { grid-template-columns: 1fr; } h1 { font-size: 23px; } }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <aside>
-      <div class="brand">
-        <div class="brand-mark">MW</div>
-        <div>
-          <h1>MarketWatch Asset Desk</h1>
-          <p>Solar trading intelligence</p>
+  <div class="page">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Portfolio Performance</div>
+        <h1>May 2026 Molecule Revenue And Generation</h1>
+        <div class="meta">
+          <span class="tag" id="date-tag"></span>
+          <span class="tag">Through HE 22</span>
+          <span class="tag">May 1-13 loaded</span>
         </div>
-      </div><div class="control-label">Asset lookup</div>
-  <input id="assetSearch" placeholder="Search asset, node, hub..." />
+      </div>
+      <div class="toolbar" aria-label="Dashboard controls">
+        <select class="date-select" id="date-select" aria-label="Select report date"></select>
+        <button class="tool active" data-sort="project">Project</button>
+        <button class="tool" data-sort="generationVsAop">Generation vs AOP</button>
+        <button class="tool" data-sort="revenueVsAop">Revenue vs AOP</button>
+        <button class="tool" data-sort="revenue">Revenue</button>
+        <button class="tool" id="theme-toggle" type="button">Dark mode</button>
+      </div>
+    </header>
 
-  <div class="control-label">ISO</div>
-  <select id="isoSelect">
-    <option value="all">All markets</option>
-    <option value="ERCOT">ERCOT</option>
-    <option value="CAISO">CAISO</option>
-  </select>
+    <section class="kpis" aria-label="Summary KPIs" id="kpis"></section>
 
-  <div class="control-label">Fleet assets</div>
-  <div class="nav-group" id="assetList"></div>
+    <section class="readout">
+      <div id="readout-text"></div>
+      <div class="legend" aria-label="Traffic signal legend">
+        <span><span class="dot green"></span> 95%+</span>
+        <span><span class="dot yellow"></span> 80-94%</span>
+        <span><span class="dot red"></span> Below 80%</span>
+      </div>
+    </section>
 
-  <div class="control-label">Desk priorities</div>
-  <div class="nav-group">
-    <div class="asset-card">
-      <strong>Basis monitor <span class="pill yellow">Active</span></strong>
-      <span>Node minus hub spread, moving percentile, congestion risk.</span>
-    </div>
-    <div class="asset-card">
-      <strong>Forecast error <span class="pill blue">Hourly</span></strong>
-      <span>ISO load, net load, renewable deviation and ramp exposure.</span>
-    </div>
-    <div class="asset-card">
-      <strong>Revenue-at-risk <span class="pill red">Watch</span></strong>
-      <span>Negative pricing, curtailment, outage, and settlement exposure.</span>
-    </div>
+    <section class="visuals" aria-label="Time series and project visuals">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Daily Portfolio Trend</div>
+            <div class="panel-note">Click any point to select that date.</div>
+          </div>
+        </div>
+        <div class="chart-body">
+          <div id="time-series-chart"></div>
+          <div class="chart-legend">
+            <span class="legend-line"><span class="sample"></span>Generation vs AOP</span>
+            <span class="legend-line"><span class="sample rev"></span>Revenue vs AOP</span>
+            <span class="legend-line"><span class="sample aop"></span>95% green threshold</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Selected Day Attainment</div>
+            <div class="panel-note">Project bars for selected date.</div>
+          </div>
+        </div>
+        <div class="chart-body project-bars" id="project-bars"></div>
+      </article>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Project Performance</div>
+            <div class="panel-note">Click a project to update the detail panel.</div>
+          </div>
+          <div class="panel-note" id="rows-note"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Generation</th>
+                <th>Generation AOP</th>
+                <th>Generation vs AOP</th>
+                <th>Revenue</th>
+                <th>Revenue AOP</th>
+                <th>Revenue vs AOP</th>
+              </tr>
+            </thead>
+            <tbody id="project-table"></tbody>
+            <tfoot id="total-row"></tfoot>
+          </table>
+        </div>
+      </article>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Project Detail</div>
+            <div class="panel-note" id="rank-label">Portfolio summary</div>
+          </div>
+        </div>
+        <div class="detail" id="detail"></div>
+      </aside>
+    </section>
   </div>
-</aside>
 
-<main>
-  <div class="topbar">
-    <div class="title-block">
-      <h2 id="pageTitle">Solar Asset Command Center</h2>
-      <p id="pageSubtitle">Instant asset-level view of nodal pricing, hub reference pricing, basis, ISO load vs forecast, net load ramps, operating exposure, and tradeable signals.</p>
-    </div>
-    <div class="toolbar">
-      <button class="btn">Export PDF</button>
-      <button class="btn">Settlement View</button>
-      <button class="btn primary">Live Refresh</button>
-    </div>
-  </div>
+  <script>
+    const dashboard = {"title": "May 2026 Molecule Revenue And Generation", "startDate": "2026-05-01", "endDate": "2026-05-13", "maxHourEnding": 22, "greenAt": 0.95, "yellowAt": 0.8, "days": [{"date": "2026-05-01", "projects": [{"project": "Juno A", "generation": 396.221175327897, "generationAop": 1461.0, "generationVsAop": 0.27119861418747226, "revenue": 11799.41029108658, "revenueAop": 37430.0, "revenueVsAop": 0.3152393879531547, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 313.99882598686963, "generationAop": 1293.0, "generationVsAop": 0.24284518637808944, "revenue": 7580.479448455366, "revenueAop": 26132.0, "revenueVsAop": 0.2900841668626728, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 846.803999401629, "generationAop": 2527.0, "generationVsAop": 0.3351024928380012, "revenue": 11378.206025920792, "revenueAop": 54949.0, "revenueVsAop": 0.2070684821547397, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 605.4737316779792, "generationAop": 1814.0, "generationVsAop": 0.3337782423803634, "revenue": 12345.609388913997, "revenueAop": 31630.0, "revenueVsAop": 0.3903132908287701, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 945.8949386775494, "generationAop": 1814.0, "generationVsAop": 0.5214415317957825, "revenue": 33655.2880498609, "revenueAop": 62641.0, "revenueVsAop": 0.5372725219881691, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 192.63125834427774, "generationAop": 1411.0, "generationVsAop": 0.13652109025108272, "revenue": 7559.948200454688, "revenueAop": 44348.0, "revenueVsAop": 0.17046875170142256, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 266.20341577380896, "generationAop": 1779.0, "generationVsAop": 0.14963654624722258, "revenue": 10137.34473428315, "revenueAop": 52900.0, "revenueVsAop": 0.1916322256008157, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 219.66852501034737, "generationAop": 1726.0, "generationVsAop": 0.12727029259000427, "revenue": 8317.880720287563, "revenueAop": 51287.0, "revenueVsAop": 0.16218302338385093, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 318.3746409435307, "generationAop": 2669.0, "generationVsAop": 0.11928611500319622, "revenue": 78634.18721183721, "revenueAop": 72289.0, "revenueVsAop": 1.0877752799435214, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 371.89224473747976, "generationAop": 2113.0, "generationVsAop": 0.17600200886771403, "revenue": 71006.01349056103, "revenueAop": 65103.0, "revenueVsAop": 1.0906719120556816, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 4477.0, "generationAop": 18607.0, "generationVsAop": 0.24061712021719617, "revenue": 252414.0, "revenueAop": 498709.0, "revenueVsAop": 0.5061355771836107, "rows": 1232}}, {"date": "2026-05-02", "projects": [{"project": "Juno A", "generation": 1510.7412123559043, "generationAop": 1464.0, "generationVsAop": 1.0319270576201531, "revenue": 41967.87932163629, "revenueAop": 37522.0, "revenueVsAop": 1.118487269378932, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1311.708779823035, "generationAop": 1296.0, "generationVsAop": 1.0121209720856752, "revenue": 29128.585379756343, "revenueAop": 26196.0, "revenueVsAop": 1.1119478309572586, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 1798.562905691564, "generationAop": 2533.0, "generationVsAop": 0.7100524696768907, "revenue": 38273.032572318036, "revenueAop": 55085.0, "revenueVsAop": 0.6947995383919041, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1097.31487018615, "generationAop": 1818.0, "generationVsAop": 0.6035835369560781, "revenue": 22256.488656240632, "revenueAop": 31708.0, "revenueVsAop": 0.7019202931828129, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2613.3260265290737, "generationAop": 1819.0, "generationVsAop": 1.4366828073276932, "revenue": 96050.45451067008, "revenueAop": 62796.0, "revenueVsAop": 1.5295632605686682, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 2050.4888908341527, "generationAop": 1415.0, "generationVsAop": 1.4491087567732528, "revenue": 76035.46749242676, "revenueAop": 44457.0, "revenueVsAop": 1.7103148546331681, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 2559.488034211099, "generationAop": 1783.0, "generationVsAop": 1.4354952519411661, "revenue": 92817.19696474678, "revenueAop": 53030.0, "revenueVsAop": 1.7502771443474783, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 2452.974470436573, "generationAop": 1730.0, "generationVsAop": 1.4179043181714295, "revenue": 88653.03118528941, "revenueAop": 51413.0, "revenueVsAop": 1.7243310288310234, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2674.887560693751, "generationAop": 2675.0, "generationVsAop": 0.9999579666144863, "revenue": 78884.31900587892, "revenueAop": 72467.0, "revenueVsAop": 1.0885550527257775, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2132.0237108251313, "generationAop": 2118.0, "generationVsAop": 1.006621204355586, "revenue": 70190.23943861503, "revenueAop": 65263.0, "revenueVsAop": 1.0754982063131486, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 20202.0, "generationAop": 18651.0, "generationVsAop": 1.0831331543395224, "revenue": 634257.0, "revenueAop": 499937.0, "revenueVsAop": 1.268673241883634, "rows": 1232}}, {"date": "2026-05-03", "projects": [{"project": "Juno A", "generation": 1466.8769418150187, "generationAop": 1468.0, "generationVsAop": 0.9992349739884323, "revenue": 39904.279318132845, "revenueAop": 37615.0, "revenueVsAop": 1.060860808670287, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1270.6728100776672, "generationAop": 1300.0, "generationVsAop": 0.9774406231366671, "revenue": 26259.811603179576, "revenueAop": 26261.0, "revenueVsAop": 0.9999547467034605, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 746.4087197482586, "generationAop": 2539.0, "generationVsAop": 0.29397743983783325, "revenue": 14083.383016045014, "revenueAop": 55220.0, "revenueVsAop": 0.25504134400661016, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 48.71119671780615, "generationAop": 1823.0, "generationVsAop": 0.026720349269229924, "revenue": 974.3779238529501, "revenueAop": 31786.0, "revenueVsAop": 0.03065431082404046, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2558.2729638516903, "generationAop": 1823.0, "generationVsAop": 1.4033313021676852, "revenue": 76319.71350695998, "revenueAop": 62950.0, "revenueVsAop": 1.2123862352177914, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1984.4760858416557, "generationAop": 1418.0, "generationVsAop": 1.3994894822578672, "revenue": 75776.98455711662, "revenueAop": 44567.0, "revenueVsAop": 1.7002935929525573, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 2445.72806596756, "generationAop": 1788.0, "generationVsAop": 1.3678568601608276, "revenue": 91911.99301023559, "revenueAop": 53160.0, "revenueVsAop": 1.7289690182512338, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 2337.5231130719185, "generationAop": 1735.0, "generationVsAop": 1.3472755694939011, "revenue": 87141.44081210924, "revenueAop": 51539.0, "revenueVsAop": 1.6907864105261887, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2734.5924100864213, "generationAop": 2682.0, "generationVsAop": 1.019609399733938, "revenue": 70283.70376478927, "revenueAop": 72645.0, "revenueVsAop": 0.9674954059438264, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2181.5146551523358, "generationAop": 2123.0, "generationVsAop": 1.0275622492474497, "revenue": 62006.26509054602, "revenueAop": 65423.0, "revenueVsAop": 0.9477747136411662, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 17775.0, "generationAop": 18699.0, "generationVsAop": 0.9505736650264898, "revenue": 544662.0, "revenueAop": 501166.0, "revenueVsAop": 1.0867895120638016, "rows": 1232}}, {"date": "2026-05-04", "projects": [{"project": "Juno A", "generation": 1036.2055521011353, "generationAop": 1472.0, "generationVsAop": 0.7039439891991408, "revenue": 16155.151577007771, "revenueAop": 37707.0, "revenueVsAop": 0.42843905845089164, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 867.9614481925963, "generationAop": 1303.0, "generationVsAop": 0.6661254399022228, "revenue": 8733.986137121912, "revenueAop": 26325.0, "revenueVsAop": 0.3317753518374895, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 1734.9815561771393, "generationAop": 2545.0, "generationVsAop": 0.6817216330754968, "revenue": 10306.988029878727, "revenueAop": 55355.0, "revenueVsAop": 0.1861979591704223, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 83.2383622135967, "generationAop": 1827.0, "generationVsAop": 0.0455601325744919, "revenue": 1165.346746444404, "revenueAop": 31864.0, "revenueVsAop": 0.03657251903227479, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2551.3490178883076, "generationAop": 1828.0, "generationVsAop": 1.3957051520176738, "revenue": 86000.44162999479, "revenueAop": 63104.0, "revenueVsAop": 1.362836613051388, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1692.5087683200836, "generationAop": 1422.0, "generationVsAop": 1.1902312013502698, "revenue": 57258.52403489517, "revenueAop": 44676.0, "revenueVsAop": 1.2816394492545253, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 2032.4323391318321, "generationAop": 1792.0, "generationVsAop": 1.134169832104817, "revenue": 66688.6948514975, "revenueAop": 53290.0, "revenueVsAop": 1.2514298151904202, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 2016.7775942087173, "generationAop": 1739.0, "generationVsAop": 1.1597340967272671, "revenue": 70316.40384331769, "revenueAop": 51666.0, "revenueVsAop": 1.3609802160670013, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 1816.3845560482587, "generationAop": 2688.0, "generationVsAop": 0.6757383021012867, "revenue": 53405.19630851784, "revenueAop": 72823.0, "revenueVsAop": 0.7333561691844314, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 1367.6726244627498, "generationAop": 2129.0, "generationVsAop": 0.6424014206025128, "revenue": 46275.24158346444, "revenueAop": 65584.0, "revenueVsAop": 0.7055873625192798, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 15200.0, "generationAop": 18745.0, "generationVsAop": 0.8108568588287233, "revenue": 416306.0, "revenueAop": 502394.0, "revenueVsAop": 0.8286444000966179, "rows": 1232}}, {"date": "2026-05-05", "projects": [{"project": "Juno A", "generation": 946.581253539538, "generationAop": 1473.0, "generationVsAop": 0.6426213533873306, "revenue": 16807.383716213608, "revenueAop": 37753.0, "revenueVsAop": 0.4451933281120337, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 829.281502998434, "generationAop": 1304.0, "generationVsAop": 0.6359520728515599, "revenue": 9850.171818588664, "revenueAop": 26357.0, "revenueVsAop": 0.37372128157941586, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 1659.1571956574917, "generationAop": 2549.0, "generationVsAop": 0.6509051375666896, "revenue": 42839.20147473522, "revenueAop": 55423.0, "revenueVsAop": 0.7729498849707742, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1085.0692618787289, "generationAop": 1830.0, "generationVsAop": 0.5929340228845513, "revenue": 22124.562249707276, "revenueAop": 31903.0, "revenueVsAop": 0.6934947261921223, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 1178.02762093395, "generationAop": 1830.0, "generationVsAop": 0.6437309404010656, "revenue": 46307.2462215031, "revenueAop": 63181.0, "revenueVsAop": 0.7329299349725882, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 819.2020843625069, "generationAop": 1423.0, "generationVsAop": 0.5756866369378123, "revenue": 20933.781361525824, "revenueAop": 44730.0, "revenueVsAop": 0.4680031603292158, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 1023.4106673134957, "generationAop": 1794.0, "generationVsAop": 0.5704630252583588, "revenue": 26927.954474241975, "revenueAop": 53356.0, "revenueVsAop": 0.5046846554134863, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 1027.0901172831655, "generationAop": 1741.0, "generationVsAop": 0.5899426291115253, "revenue": 25188.02354320088, "revenueAop": 51729.0, "revenueVsAop": 0.4869226844362134, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2163.095924764624, "generationAop": 2692.0, "generationVsAop": 0.8035274609081071, "revenue": 70558.80773104985, "revenueAop": 72912.0, "revenueVsAop": 0.9677255833203019, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 1696.749016032467, "generationAop": 2131.0, "generationVsAop": 0.7962219690438606, "revenue": 62181.8955095009, "revenueAop": 65664.0, "revenueVsAop": 0.946970874596444, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 12428.0, "generationAop": 18767.0, "generationVsAop": 0.6622083787906645, "revenue": 343719.0, "revenueAop": 503008.0, "revenueVsAop": 0.6833271600059388, "rows": 1232}}, {"date": "2026-05-06", "projects": [{"project": "Juno A", "generation": 1530.64584800601, "generationAop": 1477.0, "generationVsAop": 1.0363208178781382, "revenue": 42568.3960398811, "revenueAop": 37845.0, "revenueVsAop": 1.1248089850675413, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1316.461403593421, "generationAop": 1308.0, "generationVsAop": 1.0064689629919121, "revenue": 29307.596419904523, "revenueAop": 26421.0, "revenueVsAop": 1.1092538669961214, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2672.5486977249384, "generationAop": 2555.0, "generationVsAop": 1.0460073180919525, "revenue": 79366.42920887044, "revenueAop": 55558.0, "revenueVsAop": 1.4285328703133742, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1820.7551710009575, "generationAop": 1834.0, "generationVsAop": 0.9927781739372723, "revenue": 37125.19793670952, "revenueAop": 31980.0, "revenueVsAop": 1.160887990516245, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 328.95075242221355, "generationAop": 1834.0, "generationVsAop": 0.17936246042650686, "revenue": 13121.443783387538, "revenueAop": 63336.0, "revenueVsAop": 0.2071719682864017, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 575.7713107727468, "generationAop": 1427.0, "generationVsAop": 0.4034837496655549, "revenue": 16592.161397233198, "revenueAop": 44840.0, "revenueVsAop": 0.3700303612228635, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 759.9084503054619, "generationAop": 1799.0, "generationVsAop": 0.42240603129820004, "revenue": 22168.99173742921, "revenueAop": 53486.0, "revenueVsAop": 0.4144821399511874, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 769.2594124078751, "generationAop": 1745.0, "generationVsAop": 0.4408363394887536, "revenue": 19478.60120578786, "revenueAop": 51855.0, "revenueVsAop": 0.37563593107295074, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 1556.3424099443655, "generationAop": 2698.0, "generationVsAop": 0.576850411395243, "revenue": 86537.20359531119, "revenueAop": 73090.0, "revenueVsAop": 1.183981441993586, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 1241.4525122420087, "generationAop": 2136.0, "generationVsAop": 0.5812043596638617, "revenue": 88197.76400085475, "revenueAop": 65824.0, "revenueVsAop": 1.33990283180686, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 12572.0, "generationAop": 18813.0, "generationVsAop": 0.6682664098453197, "revenue": 434464.0, "revenueAop": 504235.0, "revenueVsAop": 0.8616295682080167, "rows": 1232}}, {"date": "2026-05-07", "projects": [{"project": "Juno A", "generation": 1813.5784754157066, "generationAop": 1481.0, "generationVsAop": 1.2245634540281611, "revenue": 54608.35278390048, "revenueAop": 37937.0, "revenueVsAop": 1.439448369241123, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1592.8822813630104, "generationAop": 1311.0, "generationVsAop": 1.2150131818177043, "revenue": 39160.50029905677, "revenueAop": 26486.0, "revenueVsAop": 1.4785358415410694, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2230.4650600776076, "generationAop": 2561.0, "generationVsAop": 0.8709352050283513, "revenue": 53216.2048277749, "revenueAop": 55694.0, "revenueVsAop": 0.9555105545978902, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1518.4299504309893, "generationAop": 1839.0, "generationVsAop": 0.8256824091522508, "revenue": 30960.78668928788, "revenueAop": 32058.0, "revenueVsAop": 0.9657741184505546, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2161.3648339342326, "generationAop": 1839.0, "generationVsAop": 1.1752935475444442, "revenue": 62500.17548594749, "revenueAop": 63490.0, "revenueVsAop": 0.9844097572207826, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 415.8313548713922, "generationAop": 1430.0, "generationVsAop": 0.2907911572527218, "revenue": 15251.720845117357, "revenueAop": 44949.0, "revenueVsAop": 0.3393116831323802, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 629.2558829933405, "generationAop": 1803.0, "generationVsAop": 0.34900492678499195, "revenue": 22781.88741953419, "revenueAop": 53616.0, "revenueVsAop": 0.424908374730196, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 559.6957958452404, "generationAop": 1750.0, "generationVsAop": 0.31982616905442307, "revenue": 20593.877127031217, "revenueAop": 51981.0, "revenueVsAop": 0.39618085698680705, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2813.2037615663066, "generationAop": 2705.0, "generationVsAop": 1.0400013905975256, "revenue": 88460.89648747731, "revenueAop": 73268.0, "revenueVsAop": 1.2073606006370763, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2243.238501650296, "generationAop": 2142.0, "generationVsAop": 1.047263539519279, "revenue": 82504.8379872506, "revenueAop": 65985.0, "revenueVsAop": 1.2503574749905373, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 15978.0, "generationAop": 18861.0, "generationVsAop": 0.8471420337282287, "revenue": 470039.0, "revenueAop": 505464.0, "revenueVsAop": 0.9299163539883715, "rows": 1232}}, {"date": "2026-05-08", "projects": [{"project": "Juno A", "generation": 1360.7688759104058, "generationAop": 1482.0, "generationVsAop": 0.9181976220717988, "revenue": 54586.757552546595, "revenueAop": 37983.0, "revenueVsAop": 1.4371365493127608, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1161.354373723705, "generationAop": 1312.0, "generationVsAop": 0.8851786385089215, "revenue": 39467.67026331553, "revenueAop": 26518.0, "revenueVsAop": 1.4883351030739698, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2778.346325904131, "generationAop": 2564.0, "generationVsAop": 1.0835984110390526, "revenue": 125035.36235580176, "revenueAop": 55761.0, "revenueVsAop": 2.242344333060773, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1876.235757753253, "generationAop": 1841.0, "generationVsAop": 1.0191394664602134, "revenue": 38256.447100588826, "revenueAop": 32097.0, "revenueVsAop": 1.1919010219207038, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 1548.1208372488616, "generationAop": 1841.0, "generationVsAop": 0.8409130023079096, "revenue": 45867.37637867599, "revenueAop": 63567.0, "revenueVsAop": 0.7215595572966474, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 594.6213375639636, "generationAop": 1432.0, "generationVsAop": 0.415238364220645, "revenue": 21146.661294412563, "revenueAop": 45003.0, "revenueVsAop": 0.46989448024381847, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 793.3722176998854, "generationAop": 1805.0, "generationVsAop": 0.4395413948475819, "revenue": 27638.64676714978, "revenueAop": 53681.0, "revenueVsAop": 0.5148683289646203, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 707.6183196902275, "generationAop": 1752.0, "generationVsAop": 0.40389173498300657, "revenue": 24495.345445991716, "revenueAop": 52045.0, "revenueVsAop": 0.47065703614164117, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2827.6909839380533, "generationAop": 2708.0, "generationVsAop": 1.0441990339505367, "revenue": 86754.61383705279, "revenueAop": 73357.0, "revenueVsAop": 1.1826357925903839, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2256.1367693319917, "generationAop": 2144.0, "generationVsAop": 1.0523025976361902, "revenue": 78320.69847412733, "revenueAop": 66065.0, "revenueVsAop": 1.1855097021740306, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 15904.0, "generationAop": 18881.0, "generationVsAop": 0.8423423440900629, "revenue": 541570.0, "revenueAop": 506077.0, "revenueVsAop": 1.070132765309751, "rows": 1232}}, {"date": "2026-05-09", "projects": [{"project": "Juno A", "generation": 1563.0625, "generationAop": 1486.0, "generationVsAop": 1.0518590174966354, "revenue": 47223.274218750004, "revenueAop": 38075.0, "revenueVsAop": 1.2402698415955353, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1345.5, "generationAop": 1316.0, "generationVsAop": 1.0224164133738602, "revenue": 33420.8975, "revenueAop": 26582.0, "revenueVsAop": 1.2572755059814913, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2929.0625, "generationAop": 2570.0, "generationVsAop": 1.1397130350194553, "revenue": 57488.099999999984, "revenueAop": 55897.0, "revenueVsAop": 1.0284648550011626, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1956.5625, "generationAop": 1845.0, "generationVsAop": 1.0604674796747968, "revenue": 39894.30937499998, "revenueAop": 32175.0, "revenueVsAop": 1.2399163752913747, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 1755.25, "generationAop": 1845.0, "generationVsAop": 0.9513550135501355, "revenue": 60813.83849313915, "revenueAop": 63721.0, "revenueVsAop": 0.9543767124360752, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1449.6875, "generationAop": 1435.0, "generationVsAop": 1.0102351916376306, "revenue": 52782.44698256501, "revenueAop": 45113.0, "revenueVsAop": 1.1700052530881344, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 1859.625, "generationAop": 1810.0, "generationVsAop": 1.0274171270718233, "revenue": 66183.1599806862, "revenueAop": 53812.0, "revenueVsAop": 1.2298959336335056, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 1819.421875, "generationAop": 1756.0, "generationVsAop": 1.0361172408883828, "revenue": 63752.32810578119, "revenueAop": 52171.0, "revenueVsAop": 1.2219878496824135, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2819.9664945080876, "generationAop": 2715.0, "generationVsAop": 1.0386616922681722, "revenue": 80908.35053319769, "revenueAop": 73535.0, "revenueVsAop": 1.1002699467355368, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2244.690586639568, "generationAop": 2149.0, "generationVsAop": 1.0445279602789987, "revenue": 73493.7506416388, "revenueAop": 66225.0, "revenueVsAop": 1.1097584090847687, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 19743.0, "generationAop": 18927.0, "generationVsAop": 1.0431039761265735, "revenue": 575960.0, "revenueAop": 507306.0, "revenueVsAop": 1.135331448535515, "rows": 1232}}, {"date": "2026-05-10", "projects": [{"project": "Juno A", "generation": 1000.375, "generationAop": 1490.0, "generationVsAop": 0.6713926174496644, "revenue": 19334.593125, "revenueAop": 38168.0, "revenueVsAop": 0.506565529370153, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 830.875, "generationAop": 1319.0, "generationVsAop": 0.6299279757391963, "revenue": 11471.579374999994, "revenueAop": 26647.0, "revenueVsAop": 0.4305017215821666, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2122.375, "generationAop": 2577.0, "generationVsAop": 0.8235836243694218, "revenue": 15297.704093101018, "revenueAop": 56032.0, "revenueVsAop": 0.2730172775039445, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 701.3125, "generationAop": 1850.0, "generationVsAop": 0.37908783783783784, "revenue": 12604.843125, "revenueAop": 32253.0, "revenueVsAop": 0.3908114942796019, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 440.1875, "generationAop": 1850.0, "generationVsAop": 0.2379391891891892, "revenue": 14628.395193558668, "revenueAop": 63876.0, "revenueVsAop": 0.2290123863980003, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1320.5, "generationAop": 1439.0, "generationVsAop": 0.9176511466296039, "revenue": 42979.027368040865, "revenueAop": 45222.0, "revenueVsAop": 0.9504008528601314, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 1599.625, "generationAop": 1814.0, "generationVsAop": 0.8818219404630651, "revenue": 51436.71975561174, "revenueAop": 53942.0, "revenueVsAop": 0.9535560371438163, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 1606.25, "generationAop": 1760.0, "generationVsAop": 0.9126420454545454, "revenue": 50222.192298137204, "revenueAop": 52297.0, "revenueVsAop": 0.9603264489002659, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2740.198171870412, "generationAop": 2718.0, "generationVsAop": 1.0081670978184003, "revenue": 70662.92728247355, "revenueAop": 73624.0, "revenueVsAop": 0.9597811485721172, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2185.638579774648, "generationAop": 2152.0, "generationVsAop": 1.0156313103042045, "revenue": 66513.75605528036, "revenueAop": 66305.0, "revenueVsAop": 1.003148421013202, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 14547.0, "generationAop": 18969.0, "generationVsAop": 0.7669005615290769, "revenue": 355152.0, "revenueAop": 508366.0, "revenueVsAop": 0.6986142615186763, "rows": 1232}}, {"date": "2026-05-11", "projects": [{"project": "Juno A", "generation": 1810.625, "generationAop": 1491.0, "generationVsAop": 1.2143695506371563, "revenue": 56736.85859375002, "revenueAop": 38214.0, "revenueVsAop": 1.4847139423705977, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1593.0, "generationAop": 1320.0, "generationVsAop": 1.2068181818181818, "revenue": 41288.62749999998, "revenueAop": 26679.0, "revenueVsAop": 1.547607762659769, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 1043.25, "generationAop": 2580.0, "generationVsAop": 0.40436046511627904, "revenue": 22959.78015625, "revenueAop": 56100.0, "revenueVsAop": 0.4092652434269162, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1438.25, "generationAop": 1852.0, "generationVsAop": 0.7765928725701944, "revenue": 29325.9175, "revenueAop": 32292.0, "revenueVsAop": 0.9081480707295925, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2210.59375, "generationAop": 1852.0, "generationVsAop": 1.1936251349892009, "revenue": 75630.17455897486, "revenueAop": 63953.0, "revenueVsAop": 1.1825899419726182, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1267.75, "generationAop": 1441.0, "generationVsAop": 0.8797709923664122, "revenue": 43676.45793220023, "revenueAop": 45277.0, "revenueVsAop": 0.9646499973982426, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 1420.3125, "generationAop": 1816.0, "generationVsAop": 0.7821104074889867, "revenue": 49962.00414057188, "revenueAop": 54007.0, "revenueVsAop": 0.925102378220821, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 1566.3125, "generationAop": 1762.0, "generationVsAop": 0.8889401248581158, "revenue": 51462.55130031096, "revenueAop": 52360.0, "revenueVsAop": 0.9828600324734713, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2799.7890625, "generationAop": 2725.0, "generationVsAop": 1.0274455275229357, "revenue": 81927.52746998744, "revenueAop": 73802.0, "revenueVsAop": 1.1100990145251814, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2202.615234375, "generationAop": 2157.0, "generationVsAop": 1.0211475356397774, "revenue": 71607.23857602688, "revenueAop": 66466.0, "revenueVsAop": 1.0773514063735876, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 17352.0, "generationAop": 18996.0, "generationVsAop": 0.9134816828213834, "revenue": 524577.0, "revenueAop": 509150.0, "revenueVsAop": 1.0302997893117396, "rows": 1232}}, {"date": "2026-05-12", "projects": [{"project": "Juno A", "generation": 1739.0, "generationAop": 1495.0, "generationVsAop": 1.163210702341137, "revenue": 52788.65687500001, "revenueAop": 38306.0, "revenueVsAop": 1.37807802628831, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1517.125, "generationAop": 1324.0, "generationVsAop": 1.1458648036253776, "revenue": 37499.008125, "revenueAop": 26743.0, "revenueVsAop": 1.402199010021314, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 1740.8125, "generationAop": 2586.0, "generationVsAop": 0.6731680201082754, "revenue": 39851.18015625002, "revenueAop": 56235.0, "revenueVsAop": 0.7086543995065354, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1739.0625, "generationAop": 1856.0, "generationVsAop": 0.9369948814655172, "revenue": 34778.96812500001, "revenueAop": 32370.0, "revenueVsAop": 1.0744197752548659, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2726.21875, "generationAop": 1857.0, "generationVsAop": 1.468076871297792, "revenue": 81881.99121564526, "revenueAop": 64107.0, "revenueVsAop": 1.2772706758332983, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1962.9375, "generationAop": 1444.0, "generationVsAop": 1.359375, "revenue": 66868.2686580288, "revenueAop": 45386.0, "revenueVsAop": 1.4733236825899794, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 2399.5, "generationAop": 1820.0, "generationVsAop": 1.3184065934065934, "revenue": 80775.19571457928, "revenueAop": 54137.0, "revenueVsAop": 1.492051567589251, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 2284.484375, "generationAop": 1767.0, "generationVsAop": 1.292860427277872, "revenue": 73543.81661995787, "revenueAop": 52487.0, "revenueVsAop": 1.4011815615287189, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2707.875, "generationAop": 2728.0, "generationVsAop": 0.9926228005865103, "revenue": 74544.48389966937, "revenueAop": 73891.0, "revenueVsAop": 1.0088438903204635, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2141.828125, "generationAop": 2160.0, "generationVsAop": 0.9915870949074074, "revenue": 64864.21541353465, "revenueAop": 66546.0, "revenueVsAop": 0.9747274879562206, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 20959.0, "generationAop": 19037.0, "generationVsAop": 1.1009530782161054, "revenue": 607396.0, "revenueAop": 510208.0, "revenueVsAop": 1.190486595276172, "rows": 1232}}, {"date": "2026-05-13", "projects": [{"project": "Juno A", "generation": 1678.875, "generationAop": 1497.0, "generationVsAop": 1.1214929859719438, "revenue": 41639.22203125, "revenueAop": 38352.0, "revenueVsAop": 1.0857118802474448, "rows": 88, "scannedRows": 47798}, {"project": "Juno B", "generation": 1446.625, "generationAop": 1325.0, "generationVsAop": 1.0917924528301888, "revenue": 27781.803125, "revenueAop": 26775.0, "revenueVsAop": 1.0376023576097104, "rows": 88, "scannedRows": 47798}, {"project": "Titan", "generation": 2181.9375, "generationAop": 2589.0, "generationVsAop": 0.8427723059096176, "revenue": 47732.83531249999, "revenueAop": 56303.0, "revenueVsAop": 0.8477849370815053, "rows": 88, "scannedRows": 47798}, {"project": "Aragorn", "generation": 1751.4375, "generationAop": 1859.0, "generationVsAop": 0.9421395911780527, "revenue": 35711.810625000006, "revenueAop": 32409.0, "revenueVsAop": 1.1019102911228364, "rows": 88, "scannedRows": 47797}, {"project": "Eiffel", "generation": 2625.59375, "generationAop": 1859.0, "generationVsAop": 1.412368881118881, "revenue": 82325.77337076992, "revenueAop": 64184.0, "revenueVsAop": 1.2826525827428943, "rows": 88, "scannedRows": 47798}, {"project": "Orion 1", "generation": 1965.125, "generationAop": 1446.0, "generationVsAop": 1.3590076071922546, "revenue": 70231.99397031669, "revenueAop": 45440.0, "revenueVsAop": 1.5455984588538003, "rows": 88, "scannedRows": 47798}, {"project": "Orion 2", "generation": 2460.4375, "generationAop": 1823.0, "generationVsAop": 1.3496640153592978, "revenue": 86996.29058965601, "revenueAop": 54203.0, "revenueVsAop": 1.605008774231242, "rows": 88, "scannedRows": 47798}, {"project": "Orion 3", "generation": 2436.375, "generationAop": 1769.0, "generationVsAop": 1.3772611644997172, "revenue": 85190.10014761017, "revenueAop": 52550.0, "revenueVsAop": 1.6211246460059023, "rows": 88, "scannedRows": 47798}, {"project": "Athos 1", "generation": 2749.5290625, "generationAop": 2734.0, "generationVsAop": 1.0056799789685442, "revenue": 79421.43381107318, "revenueAop": 74070.0, "revenueVsAop": 1.0722483301076438, "rows": 264, "scannedRows": 143395}, {"project": "Athos 2", "generation": 2226.64453125, "generationAop": 2165.0, "generationVsAop": 1.028473224595843, "revenue": 72166.5086536334, "revenueAop": 66706.0, "revenueVsAop": 1.08185933279815, "rows": 264, "scannedRows": 143398}], "totals": {"project": "Total", "generation": 21523.0, "generationAop": 19066.0, "generationVsAop": 1.1288461053052554, "revenue": 629198.0, "revenueAop": 510992.0, "revenueVsAop": 1.2313260709302873, "rows": 1232}}], "monthTotals": {"project": "Total", "generation": 208660.0, "generationAop": 245019.0, "generationVsAop": 0.8516074263628535, "revenue": 6329714.0, "revenueAop": 6567012.0, "revenueVsAop": 0.9638651490205896, "rows": 16016}};
+    const days = dashboard.days;
+    const dateSelect = document.getElementById("date-select");
+    const dateTag = document.getElementById("date-tag");
+    const kpis = document.getElementById("kpis");
+    const readoutText = document.getElementById("readout-text");
+    const rowsNote = document.getElementById("rows-note");
+    const table = document.getElementById("project-table");
+    const totalRow = document.getElementById("total-row");
+    const detail = document.getElementById("detail");
+    const rankLabel = document.getElementById("rank-label");
+    const timeSeriesChart = document.getElementById("time-series-chart");
+    const projectBars = document.getElementById("project-bars");
+    const themeToggle = document.getElementById("theme-toggle");
+    const buttons = [...document.querySelectorAll("[data-sort]")];
+    let selectedDate = days[days.length - 1].date;
+    let selectedProject = "Total";
+    let sortKey = "project";
 
-  <div class="market-tape" id="marketTape"></div>
+    function currentDay() { return days.find(day => day.date === selectedDate) || days[days.length - 1]; }
+    function number(value) { return Math.round(value || 0).toLocaleString(); }
+    function money(value) { return `$${Math.round(value || 0).toLocaleString()}`; }
+    function percent(value) { return value == null ? "n/a" : `${Math.round(value * 100)}%`; }
+    function statusClass(value) { if (value == null) return "red"; if (value >= dashboard.greenAt) return "green"; if (value >= dashboard.yellowAt) return "yellow"; return "red"; }
+    function statusText(value) { if (value == null) return "No AOP"; if (value >= dashboard.greenAt) return "Above plan"; if (value >= dashboard.yellowAt) return "Near plan"; return "Below plan"; }
+    function signal(value) { const cls = statusClass(value); return `<span class="signal"><span class="dot ${cls}"></span>${percent(value)}</span>`; }
+    function bar(value) { const cls = statusClass(value); const width = Math.max(0, Math.min(value || 0, 1)) * 100; return `<div class="bar"><div class="track"><div class="fill ${cls}" style="width:${width}%"></div></div>${signal(value)}</div>`; }
+    function delta(actual, aop, type) { const value = (actual || 0) - (aop || 0); const sign = value >= 0 ? "+" : "-"; const display = type === "money" ? money(Math.abs(value)) : `${number(Math.abs(value))} MWh`; return `${sign}${display}`; }
+    function shortDate(value) { const [year, month, day] = value.split("-"); return `${Number(month)}/${Number(day)}`; }
+    function rowHealth(item) { return Math.min(item.generationVsAop ?? 0, item.revenueVsAop ?? 0); }
 
-  <section class="grid kpi-grid">
-    <div class="card kpi">
-      <div class="label">Node RT price</div>
-      <div class="value" id="nodePrice">$--</div>
-      <div class="sub" id="nodeSub">5-min LMP at asset node</div>
-      <canvas class="sparkline" id="spark1"></canvas>
-    </div>
-    <div class="card kpi">
-      <div class="label">Hub RT price</div>
-      <div class="value" id="hubPrice">$--</div>
-      <div class="sub" id="hubSub">Reference hub price</div>
-      <canvas class="sparkline" id="spark2"></canvas>
-    </div>
-    <div class="card kpi">
-      <div class="label">Node-Hub basis</div>
-      <div class="value" id="basis">$--</div>
-      <div class="sub" id="basisSub">Current congestion value</div>
-      <canvas class="sparkline" id="spark3"></canvas>
-    </div>
-    <div class="card kpi">
-      <div class="label">DA / RT spread</div>
-      <div class="value" id="dart">$--</div>
-      <div class="sub">Real-time premium vs day-ahead</div>
-      <canvas class="sparkline" id="spark4"></canvas>
-    </div>
-    <div class="card kpi">
-      <div class="label">Capacity factor</div>
-      <div class="value" id="cf">--%</div>
-      <div class="sub">Current MW / AC capacity</div>
-      <canvas class="sparkline" id="spark5"></canvas>
-    </div>
-    <div class="card kpi">
-      <div class="label">Revenue-at-risk</div>
-      <div class="value" id="rar">$--</div>
-      <div class="sub">Next 24h basis and negative price risk</div>
-      <canvas class="sparkline" id="spark6"></canvas>
-    </div>
-  </section>
+    function populateDates() {
+      dateSelect.innerHTML = days.map(day => `<option value="${day.date}">${day.date}</option>`).join("");
+      dateSelect.value = selectedDate;
+    }
 
-  <section class="grid main-grid">
-    <div class="stack">
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h3>Price Formation: Node vs Hub vs Day-Ahead</h3>
-            <p>Track intraday LMP behavior, asset basis, settlement exposure, and whether the node is outperforming the reference hub.</p>
-          </div>
-          <span class="pill dark" id="priceBadge">Live proxy</span>
+    function sortedProjects() {
+      const rows = [...currentDay().projects];
+      if (sortKey === "project") return rows.sort((a, b) => a.project.localeCompare(b.project));
+      return rows.sort((a, b) => (b[sortKey] ?? -1) - (a[sortKey] ?? -1));
+    }
+
+    function rowMarkup(item) {
+      return `
+        <tr class="${item.project === selectedProject ? "selected" : ""}" data-project="${item.project}">
+          <td><span class="project-name"><span class="dot ${statusClass(rowHealth(item))}"></span>${item.project}</span></td>
+          <td>${number(item.generation)}</td>
+          <td>${number(item.generationAop)}</td>
+          <td>${bar(item.generationVsAop)}</td>
+          <td>${money(item.revenue)}</td>
+          <td>${money(item.revenueAop)}</td>
+          <td>${bar(item.revenueVsAop)}</td>
+        </tr>`;
+    }
+
+    function renderKpis() {
+      const total = currentDay().totals;
+      const bestGen = [...currentDay().projects].sort((a, b) => (b.generationVsAop ?? 0) - (a.generationVsAop ?? 0))[0];
+      const watch = [...currentDay().projects].sort((a, b) => rowHealth(a) - rowHealth(b))[0];
+      kpis.innerHTML = `
+        <div class="kpi"><div class="kpi-header"><span>Generation</span>${signal(total.generationVsAop)}</div><div class="kpi-value">${number(total.generation)} MWh</div><div class="kpi-sub">AOP ${number(total.generationAop)} MWh | ${delta(total.generation, total.generationAop, "mwh")}</div></div>
+        <div class="kpi"><div class="kpi-header"><span>Revenue</span>${signal(total.revenueVsAop)}</div><div class="kpi-value">${money(total.revenue)}</div><div class="kpi-sub">AOP ${money(total.revenueAop)} | ${delta(total.revenue, total.revenueAop, "money")}</div></div>
+        <div class="kpi"><div class="kpi-header"><span>Best Gen Performer</span>${signal(bestGen.generationVsAop)}</div><div class="kpi-value">${bestGen.project}</div><div class="kpi-sub">${number(bestGen.generation)} MWh vs ${number(bestGen.generationAop)} AOP</div></div>
+        <div class="kpi"><div class="kpi-header"><span>Watch Item</span>${signal(rowHealth(watch))}</div><div class="kpi-value">${watch.project}</div><div class="kpi-sub">Weakest combined generation/revenue signal</div></div>`;
+    }
+
+    function renderReadout() {
+      const day = currentDay();
+      const total = day.totals;
+      dateTag.textContent = `Report date: ${day.date}`;
+      rowsNote.textContent = `Rows: ${number(total.rows)}`;
+      const greenCount = day.projects.filter(project => rowHealth(project) >= dashboard.greenAt).length;
+      const redCount = day.projects.filter(project => rowHealth(project) < dashboard.yellowAt).length;
+      readoutText.innerHTML = `<strong>Executive readout:</strong> Portfolio is at <strong>${percent(total.generationVsAop)}</strong> generation AOP and <strong>${percent(total.revenueVsAop)}</strong> revenue AOP. ${greenCount} projects are green on both dimensions; ${redCount} projects require attention.`;
+    }
+
+    function renderTimeSeries() {
+      const width = 760, height = 270, pad = 38;
+      const values = days.flatMap(day => [day.totals.generationVsAop || 0, day.totals.revenueVsAop || 0, dashboard.greenAt]);
+      const max = Math.max(1.25, Math.ceil(Math.max(...values) * 10) / 10);
+      const x = index => pad + (index / Math.max(1, days.length - 1)) * (width - pad * 2);
+      const y = value => height - pad - ((value || 0) / max) * (height - pad * 2);
+      const line = key => days.map((day, index) => `${x(index)},${y(day.totals[key])}`).join(" ");
+      const aopLine = days.map((day, index) => `${x(index)},${y(dashboard.greenAt)}`).join(" ");
+      const points = key => days.map((day, index) => `<circle class="point" data-date="${day.date}" cx="${x(index)}" cy="${y(day.totals[key])}" r="5" fill="${key === "generationVsAop" ? "var(--blue)" : "var(--green)"}"><title>${day.date} ${percent(day.totals[key])}</title></circle>`).join("");
+      const labels = days.map((day, index) => `<text class="chart-label" x="${x(index)}" y="${height - 10}" text-anchor="middle">${shortDate(day.date)}</text>`).join("");
+      timeSeriesChart.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Daily portfolio AOP trend">
+          <line class="axis" x1="${pad}" y1="${height - pad}" x2="${width - pad}" y2="${height - pad}"></line>
+          <line class="axis" x1="${pad}" y1="${pad}" x2="${pad}" y2="${height - pad}"></line>
+          <polyline class="line-aop" points="${aopLine}"></polyline>
+          <polyline class="line-gen" points="${line("generationVsAop")}"></polyline>
+          <polyline class="line-rev" points="${line("revenueVsAop")}"></polyline>
+          ${points("generationVsAop")}
+          ${points("revenueVsAop")}
+          <text class="chart-label" x="8" y="${y(1)}">100%</text>
+          <text class="chart-label" x="8" y="${y(dashboard.greenAt)}">95%</text>
+          ${labels}
+        </svg>`;
+      [...timeSeriesChart.querySelectorAll(".point")].forEach(point => point.addEventListener("click", () => {
+        selectedDate = point.dataset.date;
+        selectedProject = "Total";
+        dateSelect.value = selectedDate;
+        render();
+      }));
+    }
+
+    function renderProjectBars() {
+      projectBars.innerHTML = [...currentDay().projects].sort((a, b) => (b.revenueVsAop ?? 0) - (a.revenueVsAop ?? 0)).map(item => {
+        const value = item.revenueVsAop ?? 0;
+        const cls = statusClass(value);
+        const width = Math.max(0, Math.min(value, 1.55)) / 1.55 * 100;
+        return `<div class="chart-row" data-project="${item.project}"><div class="chart-name">${item.project}</div><div class="chart-track"><div class="chart-fill ${cls}" style="width:${width}%"></div><div class="chart-marker"></div></div><div class="chart-value">${percent(value)}</div></div>`;
+      }).join("");
+      [...projectBars.querySelectorAll(".chart-row")].forEach(row => row.addEventListener("click", () => { selectedProject = row.dataset.project; render(); }));
+    }
+
+    function renderTable() {
+      table.innerHTML = sortedProjects().map(rowMarkup).join("");
+      totalRow.innerHTML = rowMarkup(currentDay().totals);
+      [...table.querySelectorAll("tr"), ...totalRow.querySelectorAll("tr")].forEach(row => row.addEventListener("click", () => { selectedProject = row.dataset.project; render(); }));
+    }
+
+    function rankFor(project, key) {
+      const ordered = [...currentDay().projects].sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0));
+      return ordered.findIndex(item => item.project === project) + 1;
+    }
+
+    function renderDetail() {
+      const item = selectedProject === "Total" ? currentDay().totals : currentDay().projects.find(project => project.project === selectedProject) || currentDay().totals;
+      const weakestMetric = (item.generationVsAop ?? 0) <= (item.revenueVsAop ?? 0) ? "Generation" : "Revenue";
+      const weakestValue = Math.min(item.generationVsAop ?? 0, item.revenueVsAop ?? 0);
+      const pillClass = statusClass(weakestValue);
+      rankLabel.textContent = item.project === "Total" ? "Portfolio summary" : `Gen rank ${rankFor(item.project, "generationVsAop")} | Rev rank ${rankFor(item.project, "revenueVsAop")}`;
+      detail.innerHTML = `
+        <h2>${item.project}</h2>
+        <span class="status-pill ${pillClass}"><span class="dot ${pillClass}"></span>${statusText(weakestValue)} | ${weakestMetric}</span>
+        <div class="detail-grid">
+          <div class="detail-card"><div class="detail-label">Generation</div><div class="detail-value">${number(item.generation)} MWh</div><div class="detail-sub">AOP ${number(item.generationAop)} MWh | ${delta(item.generation, item.generationAop, "mwh")}</div></div>
+          <div class="detail-card"><div class="detail-label">Generation Attainment</div><div class="detail-value">${signal(item.generationVsAop)}</div><div class="detail-sub">${bar(item.generationVsAop)}</div></div>
+          <div class="detail-card"><div class="detail-label">Revenue</div><div class="detail-value">${money(item.revenue)}</div><div class="detail-sub">AOP ${money(item.revenueAop)} | ${delta(item.revenue, item.revenueAop, "money")}</div></div>
+          <div class="detail-card"><div class="detail-label">Revenue Attainment</div><div class="detail-value">${signal(item.revenueVsAop)}</div><div class="detail-sub">${bar(item.revenueVsAop)}</div></div>
         </div>
-        <div class="chart-wrap">
-          <canvas id="priceChart"></canvas>
-        </div>
-      </div>
-
-      <div class="grid split-grid">
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h3 id="loadTitle">ISO Load vs Forecast</h3>
-              <p>Forecast miss drives scarcity risk, ancillary volatility, congestion and real-time price surprise.</p>
-            </div>
-          </div>
-          <div class="chart-wrap small">
-            <canvas id="loadChart"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h3 id="netLoadTitle">ISO Net Load & Ramp</h3>
-              <p>Useful for identifying duck-curve stress, evening ramp premiums, and negative midday pricing risk.</p>
-            </div>
-          </div>
-          <div class="chart-wrap small">
-            <canvas id="netLoadChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="card table-card">
-        <div class="card-header">
-          <div>
-            <h3>Forward Operating & Trading Checklist</h3>
-            <p>Prioritized items an analyst or trader would want before bidding, hedging, or explaining asset performance.</p>
-          </div>
-          <span class="pill green">Value Add</span>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Monitor</th>
-              <th>Current</th>
-              <th>Threshold</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="checklistRows"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="stack">
-      <div class="card signal-panel">
-        <div class="card-header" style="padding: 0;">
-          <div>
-            <h3>Asset Trading Signal</h3>
-            <p>Composite score using basis, RT premium, forecast miss, curtailment proxy, and ramp risk.</p>
-          </div>
-          <span class="pill" id="signalPill">Buy RT</span>
-        </div>
-        <div class="signal-score">
-          <div class="gauge" id="signalGauge"><span id="signalScore">68</span></div>
-          <div class="signal-copy">
-            <h4 id="signalTitle">Constructive real-time setup</h4>
-            <p id="signalText">Node is clearing above hub with moderate positive basis and supportive ISO load deviation.</p>
-          </div>
-        </div>
-        <ul class="insight-list" id="insightList"></ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h3>Congestion & Basis Decomposition</h3>
-            <p>Separate market price from local congestion so performance variance is easier to explain.</p>
-          </div>
-        </div>
-        <div class="chart-wrap small">
-          <canvas id="basisChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h3>Asset Fundamentals</h3>
-            <p>Operational context for settlement reviews, forecast checks, and trading handoffs.</p>
-          </div>
-        </div>
-        <div class="mini-metric-grid" id="fundamentals"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="grid two-col">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h3>Negative Pricing & Curtailment Window</h3>
-          <p>High-value solar alerting: midday oversupply, low net load, transmission constraints, and local LMP weakness.</p>
-        </div>
-      </div>
-      <div class="chart-wrap small">
-        <canvas id="negativeChart"></canvas>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <h3>Settlement Bridge</h3>
-          <p>Quick explainability from hub benchmark to nodal realized price and estimated asset revenue impact.</p>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Component</th>
-            <th>$/MWh</th>
-            <th>MW</th>
-            <th>Impact</th>
-          </tr>
-        </thead>
-        <tbody id="settlementRows"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <p class="footer-note">Prototype uses mock data for presentation. Wire this dashboard to ERCOT MIS / CAISO OASIS, internal SCADA, nodal settlement feeds, price curves, outage data, asset forecasts, and portfolio P&L systems for production use.</p>
-</main>
-
-  </div>  <script>
-    const assets = [
-      {
-        id: 'blue-mesa', name: 'Blue Mesa Solar', iso: 'ERCOT', zone: 'West', node: 'BLUEMESA_RN', hub: 'HB_WEST', capacity: 180, currentMW: 132,
-        nodePrice: 31.42, hubPrice: 27.86, daPrice: 25.10, forecastMW: 142, availability: 98.4, curtailment: 3.2, rar: 18400,
-        loadActual: [70200, 70950, 71600, 72180, 72890, 73940, 75210, 76500, 77780, 78400, 79080, 79920],
-        loadForecast: [69900, 70400, 71180, 71920, 72620, 73300, 74400, 75850, 77100, 77900, 78800, 79450],
-        netLoad: [42500, 40800, 38400, 35200, 31800, 29200, 28700, 30600, 34800, 40100, 46200, 51100],
-        prices: [22, 23, 24, 26, 28, 31, 33, 34, 31, 29, 28, 31],
-        hub: [24, 24, 25, 25, 26, 27, 28, 29, 28, 28, 27, 28],
-        dayAhead: [25, 25, 25, 25, 25, 25, 26, 26, 25, 25, 25, 25]
-      },
-      {
-        id: 'rio-bravo', name: 'Rio Bravo Solar', iso: 'ERCOT', zone: 'South', node: 'RIOBRAVO_RN', hub: 'HB_SOUTH', capacity: 240, currentMW: 199,
-        nodePrice: 18.35, hubPrice: 24.92, daPrice: 22.70, forecastMW: 214, availability: 96.1, curtailment: 8.7, rar: 42100,
-        loadActual: [70200, 70950, 71600, 72180, 72890, 73940, 75210, 76500, 77780, 78400, 79080, 79920],
-        loadForecast: [69900, 70400, 71180, 71920, 72620, 73300, 74400, 75850, 77100, 77900, 78800, 79450],
-        netLoad: [42500, 40800, 38400, 35200, 31800, 29200, 28700, 30600, 34800, 40100, 46200, 51100],
-        prices: [29, 26, 22, 18, 11, -4, -9, 3, 12, 18, 20, 18],
-        hub: [25, 25, 24, 24, 23, 22, 21, 22, 23, 24, 25, 25],
-        dayAhead: [23, 23, 23, 23, 22, 22, 22, 22, 23, 23, 23, 23]
-      },
-      {
-        id: 'desert-peak', name: 'Desert Peak Solar', iso: 'CAISO', zone: 'SP15', node: 'DESERTPK_1_N001', hub: 'SP15 EZ Gen Hub', capacity: 155, currentMW: 111,
-        nodePrice: 39.84, hubPrice: 34.15, daPrice: 30.80, forecastMW: 118, availability: 99.0, curtailment: 1.6, rar: 12700,
-        loadActual: [28200, 28700, 29100, 29600, 30300, 31200, 32400, 33700, 35100, 36300, 37100, 37600],
-        loadForecast: [28400, 28800, 29250, 29800, 30500, 31400, 32700, 34000, 35300, 36500, 37300, 37900],
-        netLoad: [20800, 18700, 15100, 11900, 9200, 7600, 8400, 12300, 18200, 24600, 29100, 31800],
-        prices: [26, 24, 20, 17, 13, 9, 7, 18, 31, 45, 52, 40],
-        hub: [27, 25, 22, 19, 16, 13, 12, 20, 29, 39, 44, 34],
-        dayAhead: [31, 30, 30, 29, 28, 27, 27, 29, 31, 34, 35, 31]
-      },
-      {
-        id: 'sierra-sun', name: 'Sierra Sun Solar', iso: 'CAISO', zone: 'NP15', node: 'SIERRASUN_2_N101', hub: 'NP15 EZ Gen Hub', capacity: 95, currentMW: 67,
-        nodePrice: 12.70, hubPrice: 29.40, daPrice: 28.25, forecastMW: 81, availability: 94.6, curtailment: 11.3, rar: 38600,
-        loadActual: [28200, 28700, 29100, 29600, 30300, 31200, 32400, 33700, 35100, 36300, 37100, 37600],
-        loadForecast: [28400, 28800, 29250, 29800, 30500, 31400, 32700, 34000, 35300, 36500, 37300, 37900],
-        netLoad: [20800, 18700, 15100, 11900, 9200, 7600, 8400, 12300, 18200, 24600, 29100, 31800],
-        prices: [28, 22, 13, 5, -8, -19, -16, -3, 12, 26, 31, 13],
-        hub: [30, 28, 25, 21, 18, 16, 17, 21, 25, 30, 33, 29],
-        dayAhead: [29, 29, 28, 28, 27, 27, 27, 28, 29, 29, 29, 28]
-      }
-    ];
-
-    const labels = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
-    let selectedAsset = assets[0];
-    let charts = {};
-
-    const money = value => `${value < 0 ? '-' : ''}$${Math.abs(value).toFixed(2)}`;
-    const compactMoney = value => `${value < 0 ? '-' : ''}$${Math.abs(value / 1000).toFixed(1)}k`;
-    const basis = a => a.nodePrice - a.hubPrice;
-    const dart = a => a.nodePrice - a.daPrice;
-    const cf = a => a.currentMW / a.capacity * 100;
-
-    const chartDefaults = () => {
-      Chart.defaults.color = '#91a4bd';
-      Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
-      Chart.defaults.font.family = 'Inter';
-    };
-
-    function lineDataset(label, data, color, fill = false) {
-      return {
-        label,
-        data,
-        borderColor: color,
-        backgroundColor: color.replace('1)', '0.14)'),
-        borderWidth: 2.5,
-        fill,
-        tension: 0.38,
-        pointRadius: 0,
-        pointHoverRadius: 5
-      };
+        <div class="section"><div class="section-title">Operational Checks</div><div class="read-row"><span>Rows received</span><strong>${number(item.rows)}</strong></div><div class="read-row"><span>Green threshold</span><strong>${percent(dashboard.greenAt)} AOP</strong></div></div>`;
     }
 
-    function destroyChart(id) {
-      if (charts[id]) charts[id].destroy();
+    function render() {
+      renderKpis();
+      renderReadout();
+      renderTimeSeries();
+      renderProjectBars();
+      renderTable();
+      renderDetail();
     }
 
-    function buildLineChart(id, datasets, yTitle = '') {
-      destroyChart(id);
-      charts[id] = new Chart(document.getElementById(id), {
-        type: 'line',
-        data: { labels, datasets },
-        options: {
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { labels: { usePointStyle: true, boxWidth: 8, boxHeight: 8 } },
-            tooltip: {
-              backgroundColor: '#06111f',
-              borderColor: 'rgba(255,255,255,0.15)',
-              borderWidth: 1,
-              padding: 12,
-              titleColor: '#eef5ff',
-              bodyColor: '#c6d3e3'
-            }
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y: {
-              title: { display: Boolean(yTitle), text: yTitle },
-              ticks: { callback: value => Number(value).toLocaleString() }
-            }
-          }
-        }
-      });
-    }
-
-    function buildBarChart(id, labelsIn, data, color) {
-      destroyChart(id);
-      charts[id] = new Chart(document.getElementById(id), {
-        type: 'bar',
-        data: {
-          labels: labelsIn,
-          datasets: [{ label: 'Impact', data, backgroundColor: color, borderRadius: 10 }]
-        },
-        options: {
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { x: { grid: { display: false } }, y: { ticks: { callback: value => `$${value}` } } }
-        }
-      });
-    }
-
-    function renderAssetList() {
-      const iso = document.getElementById('isoSelect').value;
-      const search = document.getElementById('assetSearch').value.toLowerCase();
-      const list = document.getElementById('assetList');
-      list.innerHTML = '';
-
-      assets
-        .filter(a => iso === 'all' || a.iso === iso)
-        .filter(a => [a.name, a.node, a.hub, a.zone].join(' ').toLowerCase().includes(search))
-        .forEach(a => {
-          const spread = basis(a);
-          const div = document.createElement('div');
-          div.className = `asset-card ${a.id === selectedAsset.id ? 'active' : ''}`;
-          div.onclick = () => { selectedAsset = a; renderAll(); };
-          div.innerHTML = `
-            <strong>${a.name}<span class="pill ${spread >= 0 ? 'green' : 'red'}">${money(spread)}</span></strong>
-            <span>${a.iso} • ${a.zone} • ${a.node}</span>
-          `;
-          list.appendChild(div);
-        });
-    }
-
-    function renderTape() {
-      const tape = document.getElementById('marketTape');
-      const items = assets.map(a => ({
-        name: `${a.name} Node`, price: a.nodePrice, delta: basis(a), label: `${a.iso} ${a.zone}`
-      })).concat([
-        { name: 'ERCOT system load', price: 79920, delta: 470, label: 'MW vs forecast' },
-        { name: 'CAISO net load ramp', price: 7240, delta: 920, label: 'MW next 3h' }
-      ]);
-
-      tape.innerHTML = items.map(item => `
-        <div class="tape-item">
-          <div class="name">${item.name}</div>
-          <div class="price">${item.price > 1000 ? item.price.toLocaleString() : money(item.price)}</div>
-          <div class="delta ${item.delta >= 0 ? 'positive' : 'negative'}">${item.delta >= 0 ? '+' : ''}${item.price > 1000 ? item.delta.toLocaleString() + ' ' + item.label : money(item.delta) + ' basis'}</div>
-        </div>
-      `).join('');
-    }
-
-    function signalFor(a) {
-      let score = 50;
-      score += Math.max(Math.min(basis(a) * 3, 18), -22);
-      score += Math.max(Math.min(dart(a) * 2, 14), -12);
-      score -= a.curtailment * 1.5;
-      score += a.iso === 'CAISO' && a.netLoad[11] - a.netLoad[6] > 18000 ? 8 : 0;
-      score += a.iso === 'ERCOT' && a.loadActual[11] - a.loadForecast[11] > 300 ? 7 : 0;
-      score = Math.round(Math.max(5, Math.min(95, score)));
-
-      if (score >= 70) return { score, label: 'Constructive', pill: 'Buy RT', cls: 'green', title: 'Constructive real-time setup', text: 'Node performance and system conditions support higher realized value relative to hub benchmark.' };
-      if (score >= 48) return { score, label: 'Neutral', pill: 'Monitor', cls: 'yellow', title: 'Balanced setup', text: 'Market signal is mixed. Keep focus on basis behavior, forecast miss, and ramp timing before changing bids.' };
-      return { score, label: 'Defensive', pill: 'Hedge / Curtail Watch', cls: 'red', title: 'Defensive operating setup', text: 'Negative basis or curtailment pressure is elevated. Review bidding, hedges, and dispatch constraints.' };
-    }
-
-    function renderKpis(a) {
-      document.getElementById('nodePrice').textContent = money(a.nodePrice);
-      document.getElementById('hubPrice').textContent = money(a.hubPrice);
-      document.getElementById('basis').textContent = money(basis(a));
-      document.getElementById('dart').textContent = money(dart(a));
-      document.getElementById('cf').textContent = `${cf(a).toFixed(1)}%`;
-      document.getElementById('rar').textContent = compactMoney(a.rar);
-      document.getElementById('nodeSub').textContent = `${a.node} 5-min LMP`;
-      document.getElementById('hubSub').textContent = `${a.hub} reference price`;
-      document.getElementById('basisSub').textContent = basis(a) >= 0 ? 'Node outperforming hub' : 'Node discount to hub';
-
-      [1,2,3,4,5,6].forEach((n, idx) => {
-        const canvas = document.getElementById(`spark${n}`);
-        if (!canvas) return;
-        if (charts[`spark${n}`]) charts[`spark${n}`].destroy();
-        const data = idx === 0 ? a.prices : idx === 1 ? a.hub : idx === 2 ? a.prices.map((p, i) => p - a.hub[i]) : idx === 3 ? a.prices.map(p => p - a.daPrice) : a.netLoad.map(v => v / 1000);
-        charts[`spark${n}`] = new Chart(canvas, {
-          type: 'line',
-          data: { labels, datasets: [{ data, borderColor: idx === 2 && basis(a) < 0 ? '#ff5c7a' : '#3ddbd9', borderWidth: 2, pointRadius: 0, tension: 0.4 }] },
-          options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
-        });
-      });
-    }
-
-    function renderCharts(a) {
-      buildLineChart('priceChart', [
-        lineDataset('Node RT LMP', a.prices, 'rgba(61, 219, 217, 1)'),
-        lineDataset('Hub RT', a.hub, 'rgba(94, 166, 255, 1)'),
-        lineDataset('Day-Ahead', a.dayAhead, 'rgba(167, 139, 250, 1)')
-      ], '$/MWh');
-
-      buildLineChart('loadChart', [
-        lineDataset('Actual load', a.loadActual, 'rgba(94, 166, 255, 1)'),
-        lineDataset('Forecast load', a.loadForecast, 'rgba(198, 211, 227, 1)')
-      ], 'MW');
-
-      buildLineChart('netLoadChart', [
-        lineDataset('Net load', a.netLoad, 'rgba(253, 176, 34, 1)', true),
-        lineDataset('3h ramp proxy', a.netLoad.map((v, i, arr) => i < 3 ? 0 : v - arr[i - 3]), 'rgba(255, 92, 122, 1)')
-      ], 'MW');
-
-      const basisData = a.prices.map((p, i) => +(p - a.hub[i]).toFixed(2));
-      buildLineChart('basisChart', [
-        lineDataset('Node-Hub basis', basisData, basis(a) >= 0 ? 'rgba(50, 213, 131, 1)' : 'rgba(255, 92, 122, 1)', true)
-      ], '$/MWh');
-
-      const negativeRisk = a.prices.map((p, i) => Math.max(0, (15 - p) + a.curtailment + Math.max(0, 14000 - a.netLoad[i]) / 1200));
-      buildBarChart('negativeChart', labels, negativeRisk.map(v => +v.toFixed(1)), 'rgba(255, 92, 122, 0.72)');
-    }
-
-    function renderSignal(a) {
-      const s = signalFor(a);
-      const gauge = document.getElementById('signalGauge');
-      const deg = Math.round(s.score / 100 * 360);
-      const color = s.cls === 'green' ? '#32d583' : s.cls === 'yellow' ? '#fdb022' : '#ff5c7a';
-      gauge.style.background = `conic-gradient(${color} 0deg, ${color} ${deg}deg, rgba(255,255,255,0.1) ${deg}deg)`;
-      document.getElementById('signalScore').textContent = s.score;
-      document.getElementById('signalTitle').textContent = s.title;
-      document.getElementById('signalText').textContent = s.text;
-      const pill = document.getElementById('signalPill');
-      pill.textContent = s.pill;
-      pill.className = `pill ${s.cls}`;
-
-      const loadMiss = a.loadActual[11] - a.loadForecast[11];
-      const eveningRamp = a.netLoad[11] - a.netLoad[6];
-      const insights = [
-        { cls: basis(a) >= 0 ? 'green' : 'red', text: `${money(basis(a))}/MWh node-hub basis: ${basis(a) >= 0 ? 'local node is adding value versus hub.' : 'local congestion is dragging realized price below hub.'}` },
-        { cls: dart(a) >= 0 ? 'green' : 'yellow', text: `${money(dart(a))}/MWh DA/RT spread: ${dart(a) >= 0 ? 'real-time is outperforming scheduled benchmark.' : 'day-ahead may be protecting downside.'}` },
-        { cls: Math.abs(loadMiss) > 300 ? 'yellow' : 'green', text: `${a.iso} load is ${loadMiss >= 0 ? 'above' : 'below'} forecast by ${Math.abs(loadMiss).toLocaleString()} MW, shaping scarcity and price surprise.` },
-        { cls: eveningRamp > 15000 ? 'yellow' : 'green', text: `Net load ramp into evening is ${eveningRamp.toLocaleString()} MW, a key driver for post-solar price strength.` },
-        { cls: a.curtailment > 7 ? 'red' : 'green', text: `Curtailment proxy is ${a.curtailment.toFixed(1)}%, ${a.curtailment > 7 ? 'high enough to warrant bid and outage review.' : 'currently manageable.'}` }
-      ];
-      document.getElementById('insightList').innerHTML = insights.map(i => `<li><span class="dot ${i.cls}"></span><span>${i.text}</span></li>`).join('');
-    }
-
-    function renderFundamentals(a) {
-      const items = [
-        ['ISO / Zone', `${a.iso} / ${a.zone}`],
-        ['Asset Node', a.node],
-        ['Reference Hub', a.hub],
-        ['AC Capacity', `${a.capacity} MW`],
-        ['Current Output', `${a.currentMW} MW`],
-        ['Forecast Output', `${a.forecastMW} MW`],
-        ['Availability', `${a.availability.toFixed(1)}%`],
-        ['Curtailment Proxy', `${a.curtailment.toFixed(1)}%`]
-      ];
-      document.getElementById('fundamentals').innerHTML = items.map(([label, value]) => `
-        <div class="mini-metric"><span>${label}</span><strong>${value}</strong></div>
-      `).join('');
-    }
-
-    function renderTables(a) {
-      const rows = [
-        ['Negative price exposure', `${Math.min(...a.prices).toFixed(2)} $/MWh`, '> 2 intervals < $0', Math.min(...a.prices) < 0 ? 'Breach' : 'Clear', Math.min(...a.prices) < 0 ? 'Review bids / curtailment logic' : 'Monitor'],
-        ['Basis percentile proxy', `${money(basis(a))}`, '< -$5/MWh', basis(a) < -5 ? 'Breach' : 'Clear', basis(a) < -5 ? 'Check congestion / outages' : 'No action'],
-        ['Load forecast error', `${(a.loadActual[11] - a.loadForecast[11]).toLocaleString()} MW`, '±500 MW', Math.abs(a.loadActual[11] - a.loadForecast[11]) > 500 ? 'Watch' : 'Clear', 'Track scarcity adders'],
-        ['Net load evening ramp', `${(a.netLoad[11] - a.netLoad[6]).toLocaleString()} MW`, '> 15,000 MW', a.netLoad[11] - a.netLoad[6] > 15000 ? 'Watch' : 'Clear', 'Assess evening RT premium'],
-        ['Forecast vs actual MW', `${(a.currentMW - a.forecastMW).toFixed(0)} MW`, '< -10 MW', a.currentMW - a.forecastMW < -10 ? 'Breach' : 'Clear', 'Validate plant / weather forecast']
-      ];
-      document.getElementById('checklistRows').innerHTML = rows.map(r => `
-        <tr>
-          <td>${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-          <td class="${r[3] === 'Breach' ? 'negative' : r[3] === 'Watch' ? 'warning' : 'positive'}">${r[3]}</td>
-          <td>${r[4]}</td>
-        </tr>
-      `).join('');
-
-      const settlement = [
-        ['Hub benchmark', a.hubPrice, a.currentMW, a.hubPrice * a.currentMW],
-        ['Node basis', basis(a), a.currentMW, basis(a) * a.currentMW],
-        ['DA/RT variance', dart(a), a.currentMW, dart(a) * a.currentMW],
-        ['Curtailment drag', -a.curtailment / 100 * a.nodePrice, a.capacity - a.currentMW, -a.curtailment / 100 * a.nodePrice * (a.capacity - a.currentMW)]
-      ];
-      document.getElementById('settlementRows').innerHTML = settlement.map(r => `
-        <tr>
-          <td>${r[0]}</td>
-          <td class="${r[1] >= 0 ? 'positive' : 'negative'}">${money(r[1])}</td>
-          <td>${r[2].toFixed(0)}</td>
-          <td class="${r[3] >= 0 ? 'positive' : 'negative'}">${compactMoney(r[3])}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderTitles(a) {
-      document.getElementById('pageTitle').textContent = `${a.name} — ${a.iso} Asset View`;
-      document.getElementById('pageSubtitle').textContent = `${a.capacity} MW solar asset at ${a.node}, benchmarked to ${a.hub}. Focused on node/hub basis, ISO forecast error, net load ramp, curtailment risk, and settlement explainability.`;
-      document.getElementById('loadTitle').textContent = `${a.iso} Load vs Forecast`;
-      document.getElementById('netLoadTitle').textContent = `${a.iso} Net Load & Ramp`;
-      document.getElementById('priceBadge').textContent = `${a.iso} • ${a.zone}`;
-    }
-
-    function renderAll() {
-      renderAssetList();
-      renderTape();
-      renderTitles(selectedAsset);
-      renderKpis(selectedAsset);
-      renderCharts(selectedAsset);
-      renderSignal(selectedAsset);
-      renderFundamentals(selectedAsset);
-      renderTables(selectedAsset);
-    }
-
-    document.getElementById('isoSelect').addEventListener('change', renderAssetList);
-    document.getElementById('assetSearch').addEventListener('input', renderAssetList);
-
-    chartDefaults();
-    renderAll();
-  </script></body>
+    dateSelect.addEventListener("change", () => { selectedDate = dateSelect.value; selectedProject = "Total"; render(); });
+    buttons.forEach(button => button.addEventListener("click", () => { sortKey = button.dataset.sort; buttons.forEach(item => item.classList.remove("active")); button.classList.add("active"); render(); }));
+    function applyTheme(theme) { const dark = theme === "dark"; document.body.classList.toggle("dark", dark); themeToggle.textContent = dark ? "Light mode" : "Dark mode"; localStorage.setItem("may-dashboard-theme", theme); }
+    themeToggle.addEventListener("click", () => applyTheme(document.body.classList.contains("dark") ? "light" : "dark"));
+    populateDates();
+    applyTheme(localStorage.getItem("may-dashboard-theme") || "light");
+    render();
+  </script>
+</body>
 </html>
